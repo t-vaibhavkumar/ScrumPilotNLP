@@ -1,6 +1,13 @@
-import os
+﻿import os
+import time
+import logging
+from collections import deque
 from jira import JIRA
+from jira.exceptions import JIRAError
 from typing import Optional, List, Dict
+from functools import wraps
+
+logger = logging.getLogger(__name__)
 
 
 class JiraManager:
@@ -21,6 +28,136 @@ class JiraManager:
             server=self.url,
             basic_auth=(self.email, self.token)
         )
+        
+        # Rate limiting configuration
+        self.rate_limit_enabled = True
+        self.rate_limit_calls = 150  # Conservative: 150/min (Jira allows 200)
+        self.rate_limit_period = 60  # seconds
+        self.call_timestamps = deque()  # Track recent API calls
+        
+        # Retry configuration
+        self.retry_enabled = True
+        self.max_retries = 3
+        self.retry_delay_base = 2  # Base delay in seconds (exponential backoff)
+        
+        logger.info(f"Rate limiting enabled: {self.rate_limit_calls} calls per {self.rate_limit_period}s")
+        logger.info(f"Retry enabled: max {self.max_retries} attempts with exponential backoff")
+
+    # ── Retry Logic ───────────────────────────────────────────────────────
+
+    def _is_retryable_error(self, error: Exception) -> bool:
+        """
+        Determine if an error is retryable.
+        
+        Retryable errors:
+        - Network errors (ConnectionError, TimeoutError)
+        - Jira server errors (500, 502, 503, 504)
+        - Rate limit errors (429)
+        
+        Non-retryable errors:
+        - Invalid data (400)
+        - Permission errors (403)
+        - Not found (404)
+        """
+        if isinstance(error, (ConnectionError, TimeoutError)):
+            return True
+        
+        if isinstance(error, JIRAError):
+            # Retry on server errors and rate limits
+            return error.status_code in [429, 500, 502, 503, 504]
+        
+        return False
+
+    def _retry_with_backoff(self, func, *args, **kwargs):
+        """
+        Execute function with exponential backoff retry logic.
+        
+        Args:
+            func: Function to execute
+            *args, **kwargs: Arguments to pass to function
+        
+        Returns:
+            Function result
+        
+        Raises:
+            Last exception if all retries fail
+        """
+        if not self.retry_enabled:
+            return func(*args, **kwargs)
+        
+        last_exception = None
+        
+        for attempt in range(self.max_retries):
+            try:
+                return func(*args, **kwargs)
+            
+            except Exception as e:
+                last_exception = e
+                
+                # Check if error is retryable
+                if not self._is_retryable_error(e):
+                    logger.error(f"Non-retryable error: {e}")
+                    raise
+                
+                # Don't retry on last attempt
+                if attempt == self.max_retries - 1:
+                    logger.error(f"Max retries ({self.max_retries}) exceeded")
+                    raise
+                
+                # Calculate backoff delay (exponential: 2s, 4s, 8s)
+                delay = self.retry_delay_base * (2 ** attempt)
+                
+                logger.warning(
+                    f"Retryable error on attempt {attempt + 1}/{self.max_retries}: {e}"
+                )
+                logger.info(f"Retrying in {delay}s...")
+                print(f"    Error: {e}")
+                print(f"    Retrying in {delay}s... (attempt {attempt + 2}/{self.max_retries})")
+                
+                time.sleep(delay)
+        
+        # Should never reach here, but just in case
+        raise last_exception
+
+    # ── Rate Limiting ─────────────────────────────────────────────────────
+
+    def _enforce_rate_limit(self):
+        """
+        Enforce rate limiting using sliding window algorithm.
+        
+        Tracks API call timestamps and sleeps if rate limit would be exceeded.
+        This prevents hitting Jira's API rate limits (200 calls/minute).
+        """
+        if not self.rate_limit_enabled:
+            return
+        
+        now = time.time()
+        
+        # Remove timestamps older than rate_limit_period (sliding window)
+        while self.call_timestamps and (now - self.call_timestamps[0]) > self.rate_limit_period:
+            self.call_timestamps.popleft()
+        
+        # Check if we're at the limit
+        if len(self.call_timestamps) >= self.rate_limit_calls:
+            # Calculate how long to wait
+            oldest_call = self.call_timestamps[0]
+            wait_time = self.rate_limit_period - (now - oldest_call) + 0.5  # Add 0.5s buffer
+            
+            if wait_time > 0:
+                logger.warning(
+                    f"Rate limit reached ({len(self.call_timestamps)} calls in {self.rate_limit_period}s), "
+                    f"waiting {wait_time:.1f}s..."
+                )
+                print(f"    Rate limit: waiting {wait_time:.1f}s...")
+                time.sleep(wait_time)
+                
+                # Clear old timestamps after waiting
+                now = time.time()
+                while self.call_timestamps and (now - self.call_timestamps[0]) > self.rate_limit_period:
+                    self.call_timestamps.popleft()
+        
+        # Record this call
+        self.call_timestamps.append(now)
 
     # ── Create ────────────────────────────────────────────────────────────
 
@@ -30,19 +167,42 @@ class JiraManager:
         description: str = "",
         issue_type: str = "Task",
         assignee_email: Optional[str] = None,
+        parent_key: Optional[str] = None,
+        epic_link: Optional[str] = None,
     ) -> Dict:
         """
-        Creates a new Jira issue.
+        Creates a new Jira issue with automatic retry on transient failures.
 
         Args:
             summary: Short title for the issue.
             description: Detailed description.
             issue_type: Jira issue type name (default "Task").
             assignee_email: Optional email of the user to assign immediately.
+            parent_key: Optional parent issue key (for Sub-tasks or Tasks under Stories).
+            epic_link: Optional Epic key to link this issue to (for Stories under Epics).
 
         Returns:
             dict with keys: success (bool), key (str), summary (str), message (str)
         """
+        # Wrap the actual creation in retry logic
+        return self._retry_with_backoff(
+            self._create_ticket_internal,
+            summary, description, issue_type, assignee_email, parent_key, epic_link
+        )
+    
+    def _create_ticket_internal(
+        self,
+        summary: str,
+        description: str,
+        issue_type: str,
+        assignee_email: Optional[str],
+        parent_key: Optional[str],
+        epic_link: Optional[str],
+    ) -> Dict:
+        """Internal method that performs the actual ticket creation."""
+        # Enforce rate limiting before API call
+        self._enforce_rate_limit()
+        
         try:
             fields = {
                 "project": self.project_key,
@@ -52,13 +212,160 @@ class JiraManager:
             }
             if assignee_email:
                 fields["assignee"] = {"name": assignee_email}
+            
+            # Set parent field for Sub-tasks and Tasks
+            if parent_key:
+                fields["parent"] = {"key": parent_key}
+            
+            # For Stories, set parent to Epic (next-gen/team-managed projects)
+            # In next-gen projects, Stories link to Epics via the parent field
+            if epic_link and issue_type == "Story":
+                fields["parent"] = {"key": epic_link}
 
             new_issue = self.client.create_issue(fields=fields)
+            
             return {
                 "success": True,
                 "key": new_issue.key,
                 "summary": summary,
                 "message": f"Ticket {new_issue.key} created successfully.",
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def create_epic(
+        self,
+        summary: str,
+        description: str = "",
+        epic_name: Optional[str] = None,
+    ) -> Dict:
+        """
+        Creates a new Epic in Jira with automatic retry on transient failures.
+
+        Args:
+            summary: Epic title/summary.
+            description: Detailed Epic description.
+            epic_name: Optional Epic name (short identifier) - NOT USED (field varies by Jira config).
+
+        Returns:
+            dict with keys: success (bool), key (str), summary (str), message (str)
+        """
+        # Wrap the actual creation in retry logic
+        return self._retry_with_backoff(
+            self._create_epic_internal,
+            summary, description, epic_name
+        )
+    
+    def _create_epic_internal(
+        self,
+        summary: str,
+        description: str,
+        epic_name: Optional[str],
+    ) -> Dict:
+        """Internal method that performs the actual Epic creation."""
+        # Enforce rate limiting before API call
+        self._enforce_rate_limit()
+        
+        try:
+            fields = {
+                "project": self.project_key,
+                "summary": summary,
+                "description": description,
+                "issuetype": {"name": "Epic"},
+            }
+            
+            # Note: Epic Name field (customfield_10011) is not set because:
+            # 1. Field ID varies by Jira configuration
+            # 2. Many Jira instances don't have this field configured
+            # 3. Epic summary is sufficient for identification
+            
+            new_epic = self.client.create_issue(fields=fields)
+            return {
+                "success": True,
+                "key": new_epic.key,
+                "summary": summary,
+                "message": f"Epic {new_epic.key} created successfully.",
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    # ── Duplicate Detection ───────────────────────────────────────────────
+
+    def find_similar_issues(
+        self,
+        summary: str,
+        issue_type: str = "Epic",
+        similarity_threshold: float = 0.85,
+        max_results: int = 20
+    ) -> List[Dict]:
+        """
+        Find issues with similar summaries to detect potential duplicates.
+        
+        Uses fuzzy string matching to find issues that might be duplicates.
+        
+        Args:
+            summary: Summary text to search for
+            issue_type: Type of issue to search (Epic, Story, Task, etc.)
+            similarity_threshold: Minimum similarity score (0.0-1.0), default 0.85
+            max_results: Maximum number of results to check
+        
+        Returns:
+            List of similar issues with similarity scores, sorted by similarity (highest first)
+            Each item contains: key, summary, similarity, status, issue_type
+        """
+        from difflib import SequenceMatcher
+        
+        # Search for issues with similar text (use first 50 chars for search)
+        search_text = summary[:50] if len(summary) > 50 else summary
+        result = self.search_tickets(
+            summary_query=search_text,
+            max_results=max_results
+        )
+        
+        if not result.get('success'):
+            logger.warning(f"Failed to search for similar issues: {result.get('error')}")
+            return []
+        
+        similar_issues = []
+        
+        for issue in result.get('issues', []):
+            # Calculate similarity score using SequenceMatcher
+            similarity = SequenceMatcher(
+                None,
+                summary.lower().strip(),
+                issue['summary'].lower().strip()
+            ).ratio()
+            
+            if similarity >= similarity_threshold:
+                similar_issues.append({
+                    'key': issue['key'],
+                    'summary': issue['summary'],
+                    'similarity': similarity,
+                    'status': issue['status'],
+                    'issue_type': issue_type  # Note: We don't get issue type from search_tickets
+                })
+        
+        # Sort by similarity (highest first)
+        similar_issues.sort(key=lambda x: x['similarity'], reverse=True)
+        
+        return similar_issues
+
+    def link_issue_to_epic(self, issue_key: str, epic_key: str) -> Dict:
+        """
+        Links an issue (Story) to an Epic.
+
+        Args:
+            issue_key: The issue key to link (e.g., "SP-123").
+            epic_key: The Epic key to link to (e.g., "SP-100").
+
+        Returns:
+            dict with keys: success (bool), message (str)
+        """
+        try:
+            self.client.add_issues_to_epic(epic_key, [issue_key])
+            return {
+                "success": True,
+                "message": f"Issue {issue_key} linked to Epic {epic_key}.",
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -142,6 +449,9 @@ class JiraManager:
         Returns:
             dict with keys: success (bool), issues (list of dicts with key, summary, status, assignee)
         """
+        # Enforce rate limiting before API call
+        self._enforce_rate_limit()
+        
         try:
             clauses = [f'project = "{self.project_key}"']
             if summary_query:
