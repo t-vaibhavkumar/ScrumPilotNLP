@@ -4,7 +4,7 @@ import logging
 from collections import deque
 from jira import JIRA
 from jira.exceptions import JIRAError
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 from functools import wraps
 
 logger = logging.getLogger(__name__)
@@ -508,6 +508,225 @@ class JiraManager:
                 "message": f"Comment added to {ticket_key}.",
             }
         except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    # ── Sprint Management ─────────────────────────────────────────────────
+
+    def create_sprint(
+        self,
+        name: str,
+        goal: str,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        board_id: Optional[int] = None
+    ) -> Dict:
+        """
+        Create a new sprint in Jira.
+        
+        Args:
+            name: Sprint name (e.g., "Sprint 23")
+            goal: Sprint goal description
+            start_date: Start date in YYYY-MM-DD format (optional)
+            end_date: End date in YYYY-MM-DD format (optional)
+            board_id: Board ID (if None, uses first board found)
+        
+        Returns:
+            dict with keys: success (bool), id (int), name (str), key (str), message (str)
+        """
+        # Enforce rate limiting before API call
+        self._enforce_rate_limit()
+        
+        try:
+            # Get board ID if not provided
+            if not board_id:
+                boards = self.client.boards()
+                if not boards:
+                    return {"success": False, "error": "No boards found in project"}
+                board_id = boards[0].id
+                logger.info(f"Using board ID: {board_id}")
+            
+            # Create sprint
+            sprint = self.client.create_sprint(
+                name=name,
+                board_id=board_id,
+                goal=goal,
+                startDate=start_date,
+                endDate=end_date
+            )
+            
+            return {
+                "success": True,
+                "id": sprint.id,
+                "name": sprint.name,
+                "key": f"SPRINT-{sprint.id}",
+                "message": f"Sprint '{name}' created successfully."
+            }
+        
+        except Exception as e:
+            logger.error(f"Failed to create sprint: {e}")
+            return {"success": False, "error": str(e)}
+
+    def move_issue_to_sprint(self, issue_key: str, sprint_id: int) -> Dict:
+        """
+        Move an issue to a sprint.
+        
+        Args:
+            issue_key: Issue key (e.g., "SP-123")
+            sprint_id: Sprint ID
+        
+        Returns:
+            dict with keys: success (bool), message (str)
+        """
+        # Enforce rate limiting before API call
+        self._enforce_rate_limit()
+        
+        try:
+            self.client.add_issues_to_sprint(sprint_id, [issue_key])
+            return {
+                "success": True,
+                "message": f"Issue {issue_key} moved to sprint {sprint_id}."
+            }
+        
+        except Exception as e:
+            logger.error(f"Failed to move issue to sprint: {e}")
+            return {"success": False, "error": str(e)}
+
+    def move_issues_to_sprint(self, issue_keys: List[str], sprint_id: int) -> Dict:
+        """
+        Move multiple issues to a sprint (bulk operation).
+        
+        Args:
+            issue_keys: List of issue keys (e.g., ["SP-123", "SP-124"])
+            sprint_id: Sprint ID
+        
+        Returns:
+            dict with keys: success (bool), moved (int), failed (int), errors (list)
+        """
+        moved = 0
+        failed = 0
+        errors = []
+        
+        for issue_key in issue_keys:
+            result = self.move_issue_to_sprint(issue_key, sprint_id)
+            if result.get('success'):
+                moved += 1
+            else:
+                failed += 1
+                errors.append(f"{issue_key}: {result.get('error')}")
+        
+        return {
+            "success": failed == 0,
+            "moved": moved,
+            "failed": failed,
+            "errors": errors,
+            "message": f"Moved {moved}/{len(issue_keys)} issues to sprint."
+        }
+
+    def assign_issue(self, issue_key: str, assignee: str) -> Dict:
+        """
+        Assign an issue to a user.
+        
+        Args:
+            issue_key: Issue key (e.g., "SP-123")
+            assignee: User email or account ID
+        
+        Returns:
+            dict with keys: success (bool), message (str)
+        """
+        # Enforce rate limiting before API call
+        self._enforce_rate_limit()
+        
+        try:
+            self.client.assign_issue(issue_key, assignee)
+            return {
+                "success": True,
+                "message": f"Issue {issue_key} assigned to {assignee}."
+            }
+        
+        except Exception as e:
+            logger.error(f"Failed to assign issue: {e}")
+            return {"success": False, "error": str(e)}
+
+    def bulk_assign_issues(self, assignments: List[Dict[str, Any]]) -> Dict:
+        """
+        Bulk assign issues to developers.
+        
+        Args:
+            assignments: List of dicts with 'issue_key' and 'assignee'
+                Example: [{"issue_key": "SP-123", "assignee": "sarah@company.com"}]
+        
+        Returns:
+            dict with keys: success (bool), assigned (int), failed (int), errors (list)
+        """
+        assigned = 0
+        failed = 0
+        errors = []
+        
+        for assignment in assignments:
+            issue_key = assignment.get('issue_key')
+            assignee = assignment.get('assignee')
+            
+            if not issue_key or not assignee:
+                failed += 1
+                errors.append(f"Invalid assignment: {assignment}")
+                continue
+            
+            result = self.assign_issue(issue_key, assignee)
+            if result.get('success'):
+                assigned += 1
+            else:
+                failed += 1
+                errors.append(f"{issue_key}: {result.get('error')}")
+        
+        return {
+            "success": failed == 0,
+            "assigned": assigned,
+            "failed": failed,
+            "errors": errors,
+            "message": f"Assigned {assigned}/{len(assignments)} issues."
+        }
+
+    def get_active_sprints(self, board_id: Optional[int] = None) -> Dict:
+        """
+        Get all active sprints.
+        
+        Args:
+            board_id: Board ID (if None, uses first board found)
+        
+        Returns:
+            dict with keys: success (bool), sprints (list)
+        """
+        # Enforce rate limiting before API call
+        self._enforce_rate_limit()
+        
+        try:
+            # Get board ID if not provided
+            if not board_id:
+                boards = self.client.boards()
+                if not boards:
+                    return {"success": False, "error": "No boards found in project"}
+                board_id = boards[0].id
+            
+            sprints = self.client.sprints(board_id, state='active')
+            
+            sprint_list = []
+            for sprint in sprints:
+                sprint_list.append({
+                    "id": sprint.id,
+                    "name": sprint.name,
+                    "state": sprint.state,
+                    "goal": getattr(sprint, 'goal', None),
+                    "startDate": getattr(sprint, 'startDate', None),
+                    "endDate": getattr(sprint, 'endDate', None)
+                })
+            
+            return {
+                "success": True,
+                "sprints": sprint_list
+            }
+        
+        except Exception as e:
+            logger.error(f"Failed to get active sprints: {e}")
             return {"success": False, "error": str(e)}
 
 

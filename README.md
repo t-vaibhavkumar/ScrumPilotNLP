@@ -43,10 +43,45 @@ python -m backend.pipelines.backlog_pipeline
 # ✅ Total: 68 items in Jira
 ```
 
-### Workflow 2: Scrum Meeting → Jira Updates (Automated) ✅
+### Workflow 2: Sprint Planning → Active Sprint (Automated) ✅
+**Command**: `python -m backend.pipelines.sprint_planning_pipeline`
+
+**Input**: Sprint Planning meeting transcript (2-hour meeting)
+
+**Process**:
+1. Extracts sprint goal and duration
+2. Identifies team capacity and velocity
+3. Captures committed stories from backlog
+4. Extracts developer task assignments
+5. Identifies risks and dependencies
+6. Creates sprint in Jira
+7. Moves stories to active sprint
+8. Assigns developers to tasks
+
+**Output**: 
+- Active sprint created in Jira
+- Stories moved from backlog to sprint
+- Developers assigned to tasks
+- Comprehensive sprint planning report
+
+**Time**: ~15-30 seconds | **Production Ready**: ✅ Yes
+
+**Example**:
+```bash
+# Run complete sprint planning
+python -m backend.pipelines.sprint_planning_pipeline
+
+# Run without Jira (dry run)
+python -m backend.pipelines.sprint_planning_pipeline --dry-run
+
+# Use custom transcript
+python -m backend.pipelines.sprint_planning_pipeline path/to/transcript.txt
+```
+
+### Workflow 3: Scrum Meeting → Jira Updates (Automated) ✅
 **Command**: `python -m backend.pipelines.scrum_pipeline`
 
-**Input**: Scrum/Standup meeting transcript
+**Input**: Scrum/Standup meeting transcript (15-minute daily meeting)
 
 **Process**:
 - Identifies task status updates ("completed", "in progress")
@@ -76,8 +111,9 @@ ScrumPilot/
 ├── main.py                     # Main application entry point
 ├── backend/
 │   ├── pipelines/              # Workflow Orchestration
-│   │   ├── backlog_pipeline.py # Workflow 1: PM → Jira (NEW)
-│   │   ├── scrum_pipeline.py   # Workflow 2: Scrum → Jira
+│   │   ├── backlog_pipeline.py # Workflow 1: PM → Jira
+│   │   ├── sprint_planning_pipeline.py # Workflow 2: Sprint Planning → Active Sprint (NEW)
+│   │   ├── scrum_pipeline.py   # Workflow 3: Scrum → Jira
 │   │   └── meet_bot.py         # Google Meet automation
 │   │
 │   ├── agents/                 # AI Intelligence
@@ -86,10 +122,11 @@ ScrumPilot/
 │   │   ├── wsjf_calculator.py      # Calculate WSJF scores
 │   │   ├── epic_decomposer.py      # Decompose Epics → Stories → Tasks
 │   │   ├── jira_creator.py         # Create hierarchy in Jira
+│   │   ├── sprint_planning_extractor.py # Extract sprint planning data (NEW)
 │   │   └── scrum_extractor.py      # Extract actions from Scrum meeting
 │   │
 │   ├── tools/                  # Integrations
-│   │   ├── jira_client.py      # Jira API wrapper (with rate limiting, retry, etc.)
+│   │   ├── jira_client.py      # Jira API wrapper (with sprint management)
 │   │   └── report_generator.py # Generate reports
 │   │
 │   ├── meeting/                # Meeting Automation
@@ -107,6 +144,7 @@ ScrumPilot/
 │   │   ├── grooming_meetings/  # Grooming meeting data
 │   │   ├── wsjf/               # WSJF calculations
 │   │   ├── decomposed/         # Decomposed backlogs
+│   │   ├── sprint_planning/    # Sprint planning data (NEW)
 │   │   ├── jira/               # Jira creation results
 │   │   ├── checkpoints/        # Pipeline checkpoints
 │   │   └── pipeline_reports/   # Pipeline execution reports
@@ -397,24 +435,3 @@ config = PipelineConfig(phase_timeout=600, pipeline_timeout=1800)
 - Real-time Jira updates
 - Instant backlog creation
 
----
-
-## 📝 License
-
-[Your License Here]
-
----
-
-## 🤝 Contributing
-
-Contributions welcome! Please read our contributing guidelines.
-
----
-
-## 📧 Support
-
-For issues and questions, please open a GitHub issue.
-
----
-
-**Built with ❤️ for Agile teams**

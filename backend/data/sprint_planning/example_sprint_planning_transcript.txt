@@ -1,0 +1,90 @@
+Sprint Planning Meeting - Sprint 24
+Date: April 12, 2026
+Duration: 2 hours
+
+Attendees:
+- Sarah (Tech Lead)
+- Mike (Senior Developer)
+- Alice (Developer)
+- Tom (Developer)
+- Bob (Product Manager)
+- Lisa (Scrum Master)
+
+===== MEETING START =====
+
+Lisa (Scrum Master): Good morning everyone! Welcome to Sprint 24 planning. Let's start by reviewing our capacity. Bob is on PTO next week for 3 days, so we're down a bit. Sarah, can you calculate our capacity?
+
+Sarah (Tech Lead): Sure. We have 5 developers, but Bob is out for 3 days. That's 5 people × 8 hours × 10 days = 400 hours, minus Bob's 24 hours. So we have 376 hours total capacity. But let's be realistic and plan for 320 hours to account for meetings and interruptions.
+
+Lisa: Perfect. 320 hours it is. Now, Bob, what's our sprint goal?
+
+Bob (PM): Our goal for Sprint 24 is to complete the user authentication system and get it production-ready. This is critical for our Q2 launch. We need login, registration, password reset, and OAuth integration all working by end of sprint.
+
+Lisa: Great goal. Let's look at the backlog. Sarah, which stories should we pull in?
+
+Sarah: Based on our last grooming session, I recommend we pull in these stories:
+- SP-198: User Login with Email/Password - 8 story points
+- SP-202: User Registration Flow - 5 story points  
+- SP-207: Password Reset Functionality - 5 story points
+- SP-188: OAuth Integration (Google/GitHub) - 13 story points
+
+That's 31 story points total, which matches our velocity from last sprint.
+
+Bob: Sounds good. Let's commit to those four stories.
+
+Lisa: Excellent. Now let's break down the work and assign tasks. Sarah, you want to start?
+
+Sarah: I'll take the OAuth integration work. That's the most complex one - SP-188. I'll handle the Google OAuth first, then GitHub. I estimate about 80 hours for the full OAuth story.
+
+Mike: I can take the login and registration stories. SP-198 and SP-202. I've done authentication before, so I'm comfortable with those. Probably 60 hours total.
+
+Alice: I'll handle the password reset functionality - SP-207. I'll need to integrate with SendGrid for the email sending. Maybe 40 hours?
+
+Tom: I can help with testing and the frontend components for all of these. I'll work on the login UI, registration forms, and password reset pages. Probably split my time across all four stories.
+
+Sarah: Good. Tom, why don't you take the sub-tasks for UI components? You can work on:
+- SP-189: Login Form UI
+- SP-190: Registration Form UI  
+- SP-191: Password Reset Form UI
+
+Tom: Perfect. I'll take those three tasks.
+
+Bob: One thing to note - we have a dependency on the DevOps team. They need to set up the OAuth callback URLs in our production environment by Wednesday. If that's delayed, it could block Sarah's work.
+
+Sarah: Yes, that's a risk. Lisa, can you follow up with DevOps today to make sure that's prioritized?
+
+Lisa: Absolutely. I'll send them a message right after this meeting.
+
+Mike: Another risk - the SendGrid API has been flaky lately. If it goes down, Alice's password reset work could be blocked.
+
+Alice: True. I'll build in a fallback mechanism just in case. Maybe a simple SMTP backup.
+
+Lisa: Good thinking. Any other risks or dependencies?
+
+Tom: The design team hasn't finalized the OAuth button styles yet. I might need to iterate on the UI once they provide the final designs.
+
+Bob: I'll check with the design team today and make sure they prioritize that.
+
+Lisa: Okay, let's summarize. We're committing to:
+- Sprint Goal: Complete user authentication system (production-ready)
+- Capacity: 320 hours
+- Stories: SP-198, SP-202, SP-207, SP-188 (31 story points)
+- Assignments:
+  * Sarah: OAuth integration (SP-188)
+  * Mike: Login and Registration (SP-198, SP-202)
+  * Alice: Password Reset (SP-207)
+  * Tom: UI components (SP-189, SP-190, SP-191)
+
+Sprint 24 starts Monday, April 14th and ends Friday, April 25th. Two weeks.
+
+Sarah: One more thing - we should have a mid-sprint check-in on Wednesday to make sure the OAuth callback URLs are set up and we're not blocked.
+
+Lisa: Good idea. I'll schedule that. Anything else?
+
+Mike: Nope, I think we're good to go.
+
+Bob: Let's do this! Excited to see authentication working by end of sprint.
+
+Lisa: Perfect. Sprint 24 is officially started. Let's make it happen!
+
+===== MEETING END =====

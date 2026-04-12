@@ -1,0 +1,49 @@
+Daily Standup - Sprint 24, Day 2
+Date: April 15, 2026
+Duration: 15 minutes
+
+Attendees:
+- Sarah (Tech Lead)
+- Mike (Senior Developer)
+- Alice (Developer)
+- Tom (Developer)
+- Lisa (Scrum Master)
+
+===== STANDUP START =====
+
+Lisa (Scrum Master): Good morning team! Let's do our daily standup. Tom, you want to start?
+
+Tom: Sure! Yesterday I finished the Login Form UI - that's SP-189. It's done and ready for review. Today I'm starting work on the Registration Form UI, which is SP-190. I'm moving that to In Progress. No blockers.
+
+Lisa: Great! Mike, you're up.
+
+Mike: Yesterday I worked on the User Login backend - SP-198. I'm about 50% done with it. Today I'll continue working on SP-198, still in progress. One blocker though - I need the database schema finalized before I can complete the authentication logic.
+
+Lisa: Noted. I'll follow up on the database schema. Alice?
+
+Alice: Yesterday I started the Password Reset functionality - SP-207. I got the email template set up. Today I'm continuing on SP-207, moving it to In Progress. I also need to test the SendGrid integration. No blockers yet.
+
+Lisa: Perfect. Sarah?
+
+Sarah: I'm working on the OAuth integration - SP-188. Yesterday I completed the Google OAuth setup. Today I'm starting the GitHub OAuth part. SP-188 is still in progress. One thing - I'm waiting on DevOps to set up the callback URLs, but I can work on the code in the meantime.
+
+Lisa: Okay, I'll check with DevOps on that. Any other blockers or concerns?
+
+Tom: Just to confirm - I completed SP-189 yesterday, so that should be marked as Done.
+
+Lisa: Got it. Anything else?
+
+Mike: Nope, we're good.
+
+Lisa: Alright team, let's keep the momentum going. Thanks everyone!
+
+===== STANDUP END =====
+
+Summary of Actions:
+- SP-189 (Login Form UI): Completed by Tom → Move to Done
+- SP-190 (Registration Form UI): Started by Tom → Move to In Progress
+- SP-198 (User Login): Continuing by Mike → Keep In Progress
+- SP-207 (Password Reset): Started by Alice → Move to In Progress
+- SP-188 (OAuth Integration): Continuing by Sarah → Keep In Progress
+- Blocker: Database schema needed for SP-198
+- Blocker: DevOps callback URLs needed for SP-188
