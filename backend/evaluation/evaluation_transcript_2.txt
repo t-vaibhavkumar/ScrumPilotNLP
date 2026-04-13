@@ -1,0 +1,17 @@
+Sameer: I finished the login API yesterday. It's working fine now.
+
+Alex: I'm still working on the integration part. That might take another day.
+
+Priya: We need a task for improving test coverage on that module.
+
+Sameer: Alex, can you own that?
+
+Alex: Sure, I'll take it.
+
+Priya: Add a comment that we are dropping SOAP support.
+
+Sameer: The reporting bug is fixed. That was causing issues earlier.
+
+Alex: I'll start on the export feature today.
+
+Priya: Let's close the legacy report generator task.

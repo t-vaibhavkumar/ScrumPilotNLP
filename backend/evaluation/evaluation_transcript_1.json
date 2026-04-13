@@ -1,0 +1,12 @@
+{
+  "expected_actions": [
+    {"action": "complete_task", "summary": "authentication middleware", "assignee": "rahul"},
+    {"action": "update_status", "summary": "dashboard ui", "assignee": "neha"},
+    {"action": "create_task", "summary": "logging to payment service"},
+    {"action": "assign_task", "summary": "dashboard error handling", "assignee": "neha"},
+    {"action": "add_comment", "summary": "payment service ticket"},
+    {"action": "complete_task", "summary": "cache invalidation bug", "assignee": "rahul"},
+    {"action": "update_status", "summary": "notifications module", "assignee": "neha"},
+    {"action": "complete_task", "summary": "analytics job"}
+  ]
+}

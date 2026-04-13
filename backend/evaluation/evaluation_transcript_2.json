@@ -1,0 +1,12 @@
+{
+  "expected_actions": [
+    {"action": "complete_task", "summary": "login api", "assignee": "sameer"},
+    {"action": "update_status", "summary": "integration part", "assignee": "alex"},
+    {"action": "create_task", "summary": "test coverage"},
+    {"action": "assign_task", "summary": "test coverage", "assignee": "alex"},
+    {"action": "add_comment", "summary": "comment"},
+    {"action": "complete_task", "summary": "reporting bug", "assignee": "sameer"},
+    {"action": "update_status", "summary": "export feature", "assignee": "alex"},
+    {"action": "complete_task", "summary": "legacy report generator"}
+  ]
+}

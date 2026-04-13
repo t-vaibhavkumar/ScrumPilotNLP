@@ -1,0 +1,11 @@
+{
+  "expected_actions": [
+    {"action": "complete_task", "summary": "api", "assignee": "dev"},
+    {"action": "update_status", "summary": "ui", "assignee": "sara"},
+    {"action": "create_task", "summary": "logging"},
+    {"action": "assign_task", "summary": "logging", "assignee": "sara"},
+    {"action": "add_comment", "summary": "comment"},
+    {"action": "complete_task", "summary": "bug", "assignee": "sara"},
+    {"action": "update_status", "summary": "deployment pipeline", "assignee": "dev"}
+  ]
+}

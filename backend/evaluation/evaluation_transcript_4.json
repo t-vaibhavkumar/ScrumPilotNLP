@@ -1,0 +1,11 @@
+{
+  "expected_actions": [
+    {"action": "update_status", "summary": "payment module", "assignee": "dev"},
+    {"action": "deadline_change"},
+    {"action": "complete_task", "summary": "login bug", "assignee": "dev"},
+    {"action": "create_task", "summary": "retry logic"},
+    {"action": "assign_task", "summary": "retry logic", "assignee": "dev"},
+    {"action": "add_comment", "summary": "comment"},
+    {"action": "update_status", "summary": "analytics pipeline", "assignee": "dev"}
+  ]
+}

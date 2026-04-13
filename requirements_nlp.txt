@@ -1,0 +1,17 @@
+# scrumpilotNLP — NLP pipeline dependencies
+# No LangChain, no Groq, no cloud LLM APIs required.
+
+# NLP core
+spacy>=3.7.0
+# After install, also run: python -m spacy download en_core_web_sm
+
+# Zero-shot classification (BART) — downloads model on first use (~1.6 GB)
+transformers>=4.40.0
+torch>=2.0.0          # CPU-only is fine; remove and use torch+cu121 for GPU
+
+# Jira client (keep existing)
+jira>=3.6.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.0.0

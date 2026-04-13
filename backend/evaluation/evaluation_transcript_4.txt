@@ -1,0 +1,13 @@
+Dev: I'm working on the payment module but I won't be able to finish it by Friday.
+
+Sara: Okay, we can push the deadline to next week.
+
+Dev: Also, the login bug is fixed.
+
+Sara: Let's create a task for retry logic.
+
+Dev: Assign that to me.
+
+Sara: Add a comment saying we are delaying release.
+
+Dev: I'll start the analytics pipeline today.

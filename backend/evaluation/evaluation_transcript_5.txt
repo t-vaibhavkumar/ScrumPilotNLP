@@ -1,0 +1,13 @@
+Dev: Finished the API.
+
+Sara: Working on UI.
+
+Dev: Create one for logging.
+
+Sara: Assign that to me.
+
+Dev: Add a comment saying it's done.
+
+Sara: That bug? Fixed.
+
+Dev: Start deployment pipeline.

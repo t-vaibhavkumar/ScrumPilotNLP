@@ -1,0 +1,12 @@
+{
+  "expected_actions": [
+    {"action": "update_status", "summary": "search functionality", "assignee": "karan"},
+    {"action": "update_status", "summary": "profile settings page", "assignee": "riya"},
+    {"action": "create_task", "summary": "error messages"},
+    {"action": "assign_task", "summary": "error messages", "assignee": "riya"},
+    {"action": "add_comment", "summary": "comment"},
+    {"action": "complete_task", "summary": "pagination bug", "assignee": "karan"},
+    {"action": "update_status", "summary": "notifications", "assignee": "riya"},
+    {"action": "complete_task", "summary": "search implementation"}
+  ]
+}
