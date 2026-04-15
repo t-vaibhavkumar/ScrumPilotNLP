@@ -220,25 +220,38 @@ Sprint Planning is a 2-hour meeting where the team:
 
 Your job is to extract structured data from the transcript.
 
-CRITICAL RULES:
+CRITICAL: NATURAL LANGUAGE MAPPING
+People will mention features by NAME, not by ticket ID.
+Examples:
+- "Let's work on the login feature" → Map to Story ID from context
+- "I'll handle the payment integration" → Map to Story ID from context
+- "I can take the login API task" → Map to Task ID from context
+
+MAPPING RULES:
+1. Use the AVAILABLE STORIES AND TASKS list provided in context
+2. Match natural language descriptions to story/task titles
+3. Match based on keywords and semantic similarity
+4. If someone mentions a feature name, find the matching story ID
+5. If someone mentions a specific task, find the matching task ID
+6. If explicit ID mentioned (SP-123), use it directly
+7. If no match found, extract the description as-is
+
+EXTRACTION RULES:
 1. Sprint Goal: Listen for phrases like "Our goal is...", "We want to...", "Let's focus on..."
 2. Capacity: Listen for "We have X hours", "Team capacity is...", "Bob is on PTO"
-3. Story Commitment: Listen for "Pull SP-123 into sprint", "Let's commit to SP-456"
-4. Assignments: Listen for "I'll take...", "Sarah will handle...", "Assign X to Mike"
+3. Story Commitment: Listen for feature names or story IDs being pulled into sprint
+4. Task Assignments: Listen for "I'll take...", "Sarah will handle...", "Assign X to Mike"
 5. Risks: Listen for "We're blocked by...", "Risk is...", "Dependency on..."
 
-STORY ID FORMATS:
-- Look for patterns like: SP-123, PROJ-456, TICKET-789
-- Extract the exact ID mentioned in the transcript
-
-DEVELOPER NAMES:
+DEVELOPER ASSIGNMENTS:
 - Extract actual names mentioned (Sarah, Mike, Bob, etc.)
 - Match assignments to specific story/task IDs
+- Developers can be assigned both stories AND tasks
 
 OUTPUT FORMAT:
 {format_instructions}
 
-Be precise and only extract information explicitly mentioned in the transcript.
+Be precise and map natural language to correct IDs using the context provided.
 If something is not mentioned, use null or empty list."""
             ),
             (
@@ -249,7 +262,7 @@ If something is not mentioned, use null or empty list."""
 
 {context}
 
-Extract the sprint planning data:"""
+Extract the sprint planning data, mapping natural language to story/task IDs:"""
             )
         ])
     
@@ -263,7 +276,7 @@ Extract the sprint planning data:"""
         
         Args:
             transcript: The meeting transcript text
-            context: Optional context (available stories, team members, etc.)
+            context: Optional context (available stories, tasks, team members, etc.)
         
         Returns:
             SprintPlanningResult with extracted data
@@ -273,25 +286,13 @@ Extract the sprint planning data:"""
         """
         logger.info("Starting sprint planning extraction")
         
-        # Prepare context string
-        context_str = ""
-        if context:
-            if "available_stories" in context:
-                stories = context["available_stories"]
-                context_str += f"\nAvailable Stories in Backlog:\n"
-                for story in stories[:20]:  # Limit to top 20
-                    context_str += f"- {story.get('story_id', 'N/A')}: {story.get('title', 'N/A')}\n"
-            
-            if "team_members" in context:
-                members = context["team_members"]
-                context_str += f"\nTeam Members: {', '.join(members)}\n"
-            
-            if "previous_velocity" in context:
-                velocity = context["previous_velocity"]
-                context_str += f"\nPrevious Sprint Velocity: {velocity} story points\n"
+        # Load context from database if not provided
+        if not context:
+            logger.info("No context provided, loading from database")
+            context = self._load_context_from_database()
         
-        if not context_str:
-            context_str = "No additional context provided."
+        # Format context for LLM
+        context_str = self._format_context(context)
         
         try:
             # Invoke chain
@@ -311,6 +312,151 @@ Extract the sprint planning data:"""
         except Exception as e:
             logger.error(f"Sprint planning extraction failed: {e}")
             raise
+    
+    def _load_context_from_database(self) -> Dict[str, Any]:
+        """
+        Load available stories and tasks from database.
+        
+        For sprint planning, we load:
+        - Stories from backlog (not in any sprint)
+        - Tasks under those stories (if already exist)
+        
+        Returns:
+            Dict with available_stories and available_tasks
+        """
+        from backend.db.connection import get_session
+        from backend.db.models import Story, BacklogTask, SprintStory
+        
+        logger.info("Loading sprint planning context from database")
+        
+        try:
+            with get_session() as session:
+                # Get stories not in any sprint (backlog)
+                # Stories in sprint have entries in sprint_stories table
+                stories_in_sprint = session.query(SprintStory.story_id).distinct()
+                
+                stories = session.query(Story).filter(
+                    ~Story.id.in_(stories_in_sprint),
+                    Story.jira_key.isnot(None)
+                ).all()
+                
+                logger.info(f"Found {len(stories)} stories in backlog")
+                
+                # Get tasks for these stories
+                story_ids = [s.id for s in stories]
+                tasks = session.query(BacklogTask).filter(
+                    BacklogTask.story_id.in_(story_ids),
+                    BacklogTask.jira_key.isnot(None)
+                ).all() if story_ids else []
+                
+                logger.info(f"Found {len(tasks)} tasks for backlog stories")
+                
+                # Format stories
+                available_stories = []
+                for story in stories:
+                    available_stories.append({
+                        'story_id': story.jira_key,
+                        'title': story.title,
+                        'description': story.description,
+                        'story_points': None,  # Story model doesn't have story_points
+                        'epic_id': story.epic.jira_key if story.epic else None
+                    })
+                
+                # Format tasks
+                available_tasks = []
+                for task in tasks:
+                    available_tasks.append({
+                        'task_id': task.jira_key,
+                        'title': task.title,
+                        'description': task.description,
+                        'story_id': task.story.jira_key if task.story else None,
+                        'estimated_hours': task.estimated_hours
+                    })
+                
+                return {
+                    'available_stories': available_stories,
+                    'available_tasks': available_tasks
+                }
+        
+        except Exception as e:
+            logger.error(f"Failed to load context from database: {e}")
+            return {
+                'available_stories': [],
+                'available_tasks': []
+            }
+    
+    def _format_context(self, context: Dict[str, Any]) -> str:
+        """
+        Format context for LLM prompt.
+        
+        Args:
+            context: Dict with available_stories, available_tasks, etc.
+        
+        Returns:
+            Formatted context string for LLM
+        """
+        context_str = "\n\nCONTEXT FOR NATURAL LANGUAGE MAPPING:\n"
+        context_str += "=" * 60 + "\n"
+        
+        # Add available stories
+        if "available_stories" in context and context["available_stories"]:
+            stories = context["available_stories"]
+            context_str += f"\nAVAILABLE STORIES IN BACKLOG ({len(stories)} total):\n"
+            
+            # Show top 30 stories
+            for story in stories[:30]:
+                context_str += f"\n- {story.get('story_id', 'N/A')}: {story.get('title', 'N/A')}"
+                if story.get('story_points'):
+                    context_str += f" ({story['story_points']} points)"
+                if story.get('epic_id'):
+                    context_str += f" [Epic: {story['epic_id']}]"
+                context_str += "\n"
+                if story.get('description'):
+                    desc = story['description'][:100]
+                    context_str += f"  Description: {desc}...\n"
+            
+            if len(stories) > 30:
+                context_str += f"\n... and {len(stories) - 30} more stories\n"
+        else:
+            context_str += "\nNo stories available in backlog.\n"
+        
+        # Add available tasks
+        if "available_tasks" in context and context["available_tasks"]:
+            tasks = context["available_tasks"]
+            context_str += f"\nAVAILABLE TASKS ({len(tasks)} total):\n"
+            
+            # Show top 30 tasks
+            for task in tasks[:30]:
+                context_str += f"\n- {task.get('task_id', 'N/A')}: {task.get('title', 'N/A')}"
+                if task.get('story_id'):
+                    context_str += f" [Story: {task['story_id']}]"
+                if task.get('estimated_hours'):
+                    context_str += f" ({task['estimated_hours']}h)"
+                context_str += "\n"
+            
+            if len(tasks) > 30:
+                context_str += f"\n... and {len(tasks) - 30} more tasks\n"
+        
+        # Add team members if provided
+        if "team_members" in context and context["team_members"]:
+            members = context["team_members"]
+            context_str += f"\nTEAM MEMBERS: {', '.join(members)}\n"
+        
+        # Add previous velocity if provided
+        if "previous_velocity" in context:
+            velocity = context["previous_velocity"]
+            context_str += f"\nPREVIOUS SPRINT VELOCITY: {velocity} story points\n"
+        
+        context_str += "\n" + "=" * 60 + "\n"
+        context_str += "\nINSTRUCTIONS:\n"
+        context_str += "- When people mention features by name, map to the correct STORY ID from the list above\n"
+        context_str += "- When people mention specific tasks, map to the correct TASK ID from the list above\n"
+        context_str += "- Match based on keywords and semantic similarity\n"
+        context_str += "- If explicit ID mentioned (SP-123), use it directly\n"
+        context_str += "- Developers can be assigned both stories AND tasks\n"
+        context_str += "=" * 60 + "\n"
+        
+        return context_str
     
     def extract_from_file(
         self,

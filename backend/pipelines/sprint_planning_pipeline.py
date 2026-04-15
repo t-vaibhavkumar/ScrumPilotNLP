@@ -57,7 +57,8 @@ class SprintPlanningPipelineResult(BaseModel):
     pipeline_id: str
     start_time: str
     end_time: Optional[str] = None
-    status: str  # 'completed', 'failed', 'partial'
+    status: str  # 'completed', 'failed', 'partial', 'paused'
+    current_phase: str = 'initialization'
     
     # Input
     transcript_path: str
@@ -74,6 +75,9 @@ class SprintPlanningPipelineResult(BaseModel):
     sprint_goal: Optional[str] = None
     stories_committed: int = 0
     developers_assigned: int = 0
+    
+    # Approval
+    approval_id: Optional[int] = None
     
     # Errors
     errors: List[str] = Field(default_factory=list)
@@ -104,11 +108,17 @@ class SprintPlanningPipeline:
         )
     """
     
-    def __init__(self):
-        """Initialize the Sprint Planning Pipeline."""
+    def __init__(self, require_telegram_approval: bool = True):
+        """
+        Initialize the Sprint Planning Pipeline.
+        
+        Args:
+            require_telegram_approval: If True, pause for PM approval before Jira creation
+        """
         self.extractor = SprintPlanningExtractor()
         self.jira = None  # Lazy load
-        logger.info("SprintPlanningPipeline initialized")
+        self.require_telegram_approval = require_telegram_approval
+        logger.info(f"SprintPlanningPipeline initialized (approval={require_telegram_approval})")
     
     def run(
         self,
@@ -167,7 +177,40 @@ class SprintPlanningPipeline:
             print(f"  Stories Committed: {len(sprint_plan.commitment.story_ids)}")
             print(f"  Developers: {len(sprint_plan.developer_assignments)}")
             
-            # Phase 2: Create in Jira
+            # Phase 2: Create approval request if required
+            if self.require_telegram_approval and create_in_jira:
+                print("\nPhase 2: Creating approval request...")
+                approval_id = self._create_telegram_approval_for_sprint(
+                    sprint_plan=sprint_plan,
+                    extraction_file=extraction_file
+                )
+                result.approval_id = approval_id
+                result.status = 'paused'
+                result.current_phase = 'sprint_extraction'
+                result.end_time = datetime.now().isoformat()
+                
+                print("\n" + "=" * 70)
+                print("✅ APPROVAL REQUEST CREATED")
+                print("=" * 70)
+                print(f"Approval ID: #{approval_id}")
+                print(f"📱 Telegram notification sent to PM")
+                print(f"⏸️  Pipeline paused. Waiting for approval...")
+                print()
+                print(f"The PM will receive a Telegram notification to review:")
+                print(f"  - Sprint Goal: {sprint_plan.sprint_goal}")
+                print(f"  - Stories: {len(sprint_plan.commitment.story_ids)}")
+                print(f"  - Developers: {len(sprint_plan.developer_assignments)}")
+                print()
+                print(f"After approval, the system will automatically:")
+                print(f"  1. Create sprint in Jira")
+                print(f"  2. Move stories to sprint")
+                print(f"  3. Assign developers")
+                print(f"  4. Update database")
+                print("=" * 70 + "\n")
+                
+                return result
+            
+            # Phase 3: Create in Jira (if no approval required)
             if create_in_jira:
                 print("\nPhase 2: Creating sprint in Jira...")
                 
@@ -192,8 +235,8 @@ class SprintPlanningPipeline:
             else:
                 print("\nSkipping Jira creation (create_in_jira=False)")
             
-            # Phase 3: Generate report
-            print("\nPhase 3: Generating report...")
+            # Phase 4: Generate report
+            print("\nPhase 4: Generating report...")
             report_file = f"backend/data/sprint_planning/{date_str}_sprint_report.md"
             self.extractor.generate_report(sprint_plan, report_file)
             print(f"  Report saved: {report_file}")
@@ -238,54 +281,229 @@ class SprintPlanningPipeline:
         """
         Load context from existing backlog data.
         
-        Looks for:
-        - Latest decomposed backlog (for available stories)
-        - Latest WSJF data (for priorities)
+        Loads:
+        - Stories from backlog (not in any sprint)
+        - Tasks under those stories
+        - Latest WSJF data for priorities
+        
+        Returns:
+            Dict with available_stories, available_tasks, previous_velocity
         """
+        from backend.db.connection import get_session
+        from backend.db.models import Story, BacklogTask, SprintStory
+        
         context = {}
         
-        # Try to load latest decomposed backlog
-        decomposed_dir = Path("backend/data/decomposed")
-        if decomposed_dir.exists():
-            json_files = sorted(decomposed_dir.glob("*_decomposed_backlog.json"), reverse=True)
-            if json_files:
-                latest_backlog = json_files[0]
-                logger.info(f"Loading backlog context from: {latest_backlog}")
+        logger.info("Loading backlog context from database")
+        
+        try:
+            with get_session() as session:
+                # Get stories not in any sprint (backlog)
+                # Stories in sprint have entries in sprint_stories table
+                stories_in_sprint = session.query(SprintStory.story_id).distinct()
                 
-                with open(latest_backlog, 'r', encoding='utf-8') as f:
-                    backlog_data = json.load(f)
+                stories = session.query(Story).filter(
+                    ~Story.id.in_(stories_in_sprint),
+                    Story.jira_key.isnot(None)
+                ).all()
                 
-                # Extract available stories
+                logger.info(f"Found {len(stories)} stories in backlog")
+                
+                # Get tasks for these stories
+                story_ids = [s.id for s in stories]
+                tasks = session.query(BacklogTask).filter(
+                    BacklogTask.story_id.in_(story_ids),
+                    BacklogTask.jira_key.isnot(None)
+                ).all() if story_ids else []
+                
+                logger.info(f"Found {len(tasks)} tasks for backlog stories")
+                
+                # Format stories
                 available_stories = []
-                for epic in backlog_data.get('epics', []):
-                    for story in epic.get('stories', []):
-                        available_stories.append({
-                            'story_id': story.get('story_id', 'N/A'),
-                            'title': story.get('title', 'N/A'),
-                            'story_points': story.get('story_points', 0),
-                            'epic_id': epic.get('epic_id', 'N/A')
-                        })
+                for story in stories:
+                    available_stories.append({
+                        'story_id': story.jira_key,
+                        'title': story.title,
+                        'description': story.description,
+                        'story_points': None,  # Story model doesn't have story_points
+                        'epic_id': story.epic.jira_key if story.epic else None
+                    })
+                
+                # Format tasks
+                available_tasks = []
+                for task in tasks:
+                    available_tasks.append({
+                        'task_id': task.jira_key,
+                        'title': task.title,
+                        'description': task.description,
+                        'story_id': task.story.jira_key if task.story else None,
+                        'estimated_hours': task.estimated_hours
+                    })
                 
                 context['available_stories'] = available_stories
-                logger.info(f"Loaded {len(available_stories)} available stories")
+                context['available_tasks'] = available_tasks
+                
+                # Calculate velocity estimate from story points in sprint_stories
+                velocity_query = session.query(SprintStory).all()
+                total_points = sum(ss.story_points or 0 for ss in velocity_query)
+                if total_points > 0:
+                    context['previous_velocity'] = total_points
+        
+        except Exception as e:
+            logger.error(f"Failed to load backlog context from database: {e}")
+            context['available_stories'] = []
+            context['available_tasks'] = []
+        
+        # Fallback: Try to load from latest decomposed backlog file
+        if not context.get('available_stories'):
+            logger.info("No stories in database, trying to load from decomposed backlog file")
+            decomposed_dir = Path("backend/data/decomposed")
+            if decomposed_dir.exists():
+                json_files = sorted(decomposed_dir.glob("*_decomposed_backlog.json"), reverse=True)
+                if json_files:
+                    latest_backlog = json_files[0]
+                    logger.info(f"Loading backlog context from: {latest_backlog}")
+                    
+                    try:
+                        with open(latest_backlog, 'r', encoding='utf-8') as f:
+                            backlog_data = json.load(f)
+                        
+                        # Extract available stories
+                        available_stories = []
+                        for epic in backlog_data.get('epics', []):
+                            for story in epic.get('stories', []):
+                                available_stories.append({
+                                    'story_id': story.get('story_id', 'N/A'),
+                                    'title': story.get('title', 'N/A'),
+                                    'story_points': story.get('story_points', 0),
+                                    'epic_id': epic.get('epic_id', 'N/A')
+                                })
+                        
+                        context['available_stories'] = available_stories
+                        logger.info(f"Loaded {len(available_stories)} available stories from file")
+                    except Exception as e:
+                        logger.error(f"Failed to load from file: {e}")
         
         # Try to load latest WSJF data for velocity
-        wsjf_dir = Path("backend/data/wsjf")
-        if wsjf_dir.exists():
-            json_files = sorted(wsjf_dir.glob("*_wsjf_scores.json"), reverse=True)
-            if json_files:
-                latest_wsjf = json_files[0]
-                with open(latest_wsjf, 'r', encoding='utf-8') as f:
-                    wsjf_data = json.load(f)
-                
-                # Calculate total story points as velocity estimate
-                total_points = sum(
-                    epic.get('wsjf_components', {}).get('effort', 0)
-                    for epic in wsjf_data.get('epics_with_wsjf', [])
-                )
-                context['previous_velocity'] = total_points
+        if 'previous_velocity' not in context:
+            wsjf_dir = Path("backend/data/wsjf")
+            if wsjf_dir.exists():
+                json_files = sorted(wsjf_dir.glob("*_wsjf_scores.json"), reverse=True)
+                if json_files:
+                    latest_wsjf = json_files[0]
+                    try:
+                        with open(latest_wsjf, 'r', encoding='utf-8') as f:
+                            wsjf_data = json.load(f)
+                        
+                        # Calculate total story points as velocity estimate
+                        total_points = sum(
+                            epic.get('wsjf_components', {}).get('effort', 0)
+                            for epic in wsjf_data.get('epics_with_wsjf', [])
+                        )
+                        context['previous_velocity'] = total_points
+                    except Exception as e:
+                        logger.error(f"Failed to load WSJF data: {e}")
         
         return context
+    
+    def _create_telegram_approval_for_sprint(
+        self,
+        sprint_plan: SprintPlanningResult,
+        extraction_file: str
+    ) -> int:
+        """
+        Create Telegram approval request for sprint planning.
+        
+        This sends the complete sprint plan (goal, stories, assignments)
+        for PM approval before Jira creation.
+        
+        Args:
+            sprint_plan: Extracted sprint planning result
+            extraction_file: Path to sprint plan JSON file
+        
+        Returns:
+            approval_id: ID of created approval request
+        
+        Raises:
+            Exception: If no PM user found or approval creation fails
+        """
+        from backend.telegram.services.approval_service import approval_service
+        
+        logger.info("Creating Telegram approval request for sprint planning")
+        
+        # Count stories and assignments
+        total_stories = len(sprint_plan.commitment.story_ids)
+        total_developers = len(sprint_plan.developer_assignments)
+        total_assignments = sum(
+            len(a.story_ids) + len(a.task_ids)
+            for a in sprint_plan.developer_assignments
+        )
+        
+        logger.info(f"Sprint plan: {total_stories} stories, {total_developers} developers, {total_assignments} assignments")
+        
+        # Get PM user for approval assignment
+        pm_user_id = approval_service.get_pm_user_id()
+        if not pm_user_id:
+            raise Exception(
+                "No PM user found for approval. "
+                "Please ensure a user with 'product_owner' role exists and has Telegram linked."
+            )
+        
+        logger.info(f"Assigning approval to PM user ID: {pm_user_id}")
+        
+        # Get system/bot user (requester)
+        system_user_id = 1  # Bot user ID
+        
+        # Create approval request with sprint plan data
+        approval_data = {
+            'sprint_plan_file': extraction_file,
+            'sprint_goal': sprint_plan.sprint_goal,
+            'sprint_number': sprint_plan.sprint_number,
+            'start_date': sprint_plan.start_date,
+            'end_date': sprint_plan.end_date,
+            'duration_weeks': sprint_plan.sprint_duration_weeks,
+            'story_ids': sprint_plan.commitment.story_ids,
+            'developer_assignments': [
+                {
+                    'developer_name': a.developer_name,
+                    'story_ids': a.story_ids,
+                    'task_ids': a.task_ids,
+                    'estimated_hours': a.estimated_hours
+                }
+                for a in sprint_plan.developer_assignments
+            ],
+            'summary': {
+                'total_stories': total_stories,
+                'total_developers': total_developers,
+                'total_assignments': total_assignments,
+                'team_capacity_hours': sprint_plan.team_capacity.total_hours
+            }
+        }
+        
+        approval_id = approval_service.create_sprint_approval(
+            sprint_data=approval_data,
+            requested_by_user_id=system_user_id,
+            assigned_to_user_id=pm_user_id,
+            priority='high'
+        )
+        
+        logger.info(f"Created approval request #{approval_id}")
+        
+        # Log summary
+        print(f"\nSprint plan submitted for approval:")
+        print(f"  Sprint Goal: {sprint_plan.sprint_goal}")
+        print(f"  Stories: {total_stories}")
+        print(f"  Developers: {total_developers}")
+        print(f"  Assignments: {total_assignments}")
+        print()
+        print(f"Stories to commit:")
+        for i, story_id in enumerate(sprint_plan.commitment.story_ids[:5], 1):
+            print(f"  {i}. {story_id}")
+        
+        if len(sprint_plan.commitment.story_ids) > 5:
+            print(f"  ... and {len(sprint_plan.commitment.story_ids) - 5} more")
+        
+        return approval_id
     
     def _create_sprint_in_jira(
         self,

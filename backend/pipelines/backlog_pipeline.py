@@ -74,6 +74,7 @@ class PipelineConfig(BaseModel):
     # Approval gates
     require_approval_after_wsjf: bool = False
     require_approval_after_decomposition: bool = False
+    require_telegram_approval: bool = True  # NEW: Enable Telegram approval integration
     
     # Jira options
     create_in_jira: bool = True
@@ -327,7 +328,7 @@ class BacklogPipeline:
             )
             self.result.wsjf_calculation_file = wsjf_output
             
-            # Optional: Human approval after WSJF
+            # Optional: Human approval after WSJF (old method)
             if self.config.require_approval_after_wsjf:
                 self._request_approval("WSJF calculation")
             
@@ -342,7 +343,40 @@ class BacklogPipeline:
             # Update summary counts
             self._update_summary_counts(decomposition_output)
             
-            # Optional: Human approval after decomposition
+            # NEW: Telegram approval integration AFTER decomposition
+            if self.config.require_telegram_approval:
+                approval_id = self._create_telegram_approval_after_decomposition(decomposition_output)
+                print(f"\n{'=' * 70}")
+                print(f"✅ APPROVAL REQUEST CREATED")
+                print(f"{'=' * 70}")
+                print(f"Approval ID: #{approval_id}")
+                print(f"📱 Telegram notification sent to PM")
+                print(f"⏸️  Pipeline paused. Waiting for approval...")
+                print(f"\nThe PM will receive a Telegram notification to review:")
+                print(f"  - {self.result.total_epics} Epic(s)")
+                print(f"  - {self.result.total_stories} Story(ies)")
+                print(f"  - {self.result.total_tasks} Task(s)")
+                print(f"\nAfter approval, the system will automatically:")
+                print(f"  1. Create complete hierarchy in Jira using JiraCreatorAgent")
+                print(f"  2. Update database with Jira keys")
+                print(f"{'=' * 70}\n")
+                
+                # Mark pipeline as paused and exit
+                self.result.status = PipelineStatus.PAUSED
+                self.result.current_phase = PipelinePhase.DECOMPOSITION
+                self.result.end_time = datetime.now().isoformat()
+                
+                # Save checkpoint
+                if self.config.save_checkpoints:
+                    self._save_checkpoint()
+                
+                # Generate report
+                if self.config.generate_final_report:
+                    self._generate_final_report()
+                
+                return self.result
+            
+            # Optional: Human approval after decomposition (old method)
             if self.config.require_approval_after_decomposition:
                 self._request_approval("decomposition")
             
@@ -926,6 +960,164 @@ class BacklogPipeline:
         date_str = datetime.now().strftime('%Y-%m-%d')
         output_dir = input_file.parent
         return str(output_dir / f"{date_str}_{suffix}")
+
+    def _create_telegram_approval(self, wsjf_file: str) -> int:
+        """
+        Create Telegram approval request for WSJF-ranked epics.
+        
+        This is the key integration point between pipeline and Telegram bot.
+        After WSJF calculation, we create an approval request that:
+        1. Saves to database
+        2. Sends Telegram notification to PM
+        3. Pauses pipeline until approval
+        
+        Args:
+            wsjf_file: Path to WSJF scores JSON file
+        
+        Returns:
+            approval_id: ID of created approval request
+        
+        Raises:
+            Exception: If no PM user found or approval creation fails
+        """
+        from backend.telegram.services.approval_service import approval_service
+        
+        logger.info("Creating Telegram approval request for WSJF-ranked epics")
+        
+        # Load WSJF data
+        with open(wsjf_file, 'r', encoding='utf-8') as f:
+            wsjf_data = json.load(f)
+        
+        epics = wsjf_data.get('epics_with_wsjf', [])
+        
+        if not epics:
+            raise Exception("No epics found in WSJF data")
+        
+        logger.info(f"Found {len(epics)} epic(s) for approval")
+        
+        # Get PM user for approval assignment
+        pm_user_id = approval_service.get_pm_user_id()
+        if not pm_user_id:
+            raise Exception(
+                "No PM user found for approval. "
+                "Please ensure a user with 'product_owner' role exists and has Telegram linked."
+            )
+        
+        logger.info(f"Assigning approval to PM user ID: {pm_user_id}")
+        
+        # Get system/bot user (requester)
+        system_user_id = 1  # Bot user ID
+        
+        # Create approval request
+        approval_id = approval_service.create_epic_approval(
+            epics_data={'epics': epics},
+            requested_by_user_id=system_user_id,
+            assigned_to_user_id=pm_user_id,
+            priority='high'
+        )
+        
+        logger.info(f"Created approval request #{approval_id}")
+        
+        # Log epic details
+        print(f"\nEpics submitted for approval:")
+        for i, epic in enumerate(epics[:5], 1):  # Show first 5
+            title = epic.get('title', 'Untitled')
+            wsjf_score = epic.get('wsjf_score', 0)
+            print(f"  {i}. {title} (WSJF: {wsjf_score:.1f})")
+        
+        if len(epics) > 5:
+            print(f"  ... and {len(epics) - 5} more")
+        
+        return approval_id
+
+    def _create_telegram_approval_after_decomposition(self, decomposition_file: str) -> int:
+        """
+        Create Telegram approval request AFTER decomposition.
+        
+        This sends the complete decomposed backlog (epics + stories + tasks)
+        for PM approval before Jira creation.
+        
+        Args:
+            decomposition_file: Path to decomposed backlog JSON file
+        
+        Returns:
+            approval_id: ID of created approval request
+        
+        Raises:
+            Exception: If no PM user found or approval creation fails
+        """
+        from backend.telegram.services.approval_service import approval_service
+        
+        logger.info("Creating Telegram approval request for decomposed backlog")
+        
+        # Load decomposed data
+        with open(decomposition_file, 'r', encoding='utf-8') as f:
+            decomposed_data = json.load(f)
+        
+        epics = decomposed_data.get('epics', [])
+        
+        if not epics:
+            raise Exception("No epics found in decomposed data")
+        
+        total_stories = sum(len(e.get('stories', [])) for e in epics)
+        total_tasks = sum(
+            len(s.get('tasks', []))
+            for e in epics
+            for s in e.get('stories', [])
+        )
+        
+        logger.info(f"Found {len(epics)} epic(s), {total_stories} stories, {total_tasks} tasks for approval")
+        
+        # Get PM user for approval assignment
+        pm_user_id = approval_service.get_pm_user_id()
+        if not pm_user_id:
+            raise Exception(
+                "No PM user found for approval. "
+                "Please ensure a user with 'product_owner' role exists and has Telegram linked."
+            )
+        
+        logger.info(f"Assigning approval to PM user ID: {pm_user_id}")
+        
+        # Get system/bot user (requester)
+        system_user_id = 1  # Bot user ID
+        
+        # Create approval request with decomposed data
+        # Store the decomposition file path so we can use it for Jira creation
+        approval_data = {
+            'decomposition_file': decomposition_file,
+            'epics': epics,
+            'summary': {
+                'total_epics': len(epics),
+                'total_stories': total_stories,
+                'total_tasks': total_tasks
+            }
+        }
+        
+        approval_id = approval_service.create_epic_approval(
+            epics_data=approval_data,
+            requested_by_user_id=system_user_id,
+            assigned_to_user_id=pm_user_id,
+            priority='high'
+        )
+        
+        logger.info(f"Created approval request #{approval_id}")
+        
+        # Log summary
+        print(f"\nDecomposed backlog submitted for approval:")
+        print(f"  Total Epics: {len(epics)}")
+        print(f"  Total Stories: {total_stories}")
+        print(f"  Total Tasks: {total_tasks}")
+        print()
+        print(f"Epics:")
+        for i, epic in enumerate(epics[:5], 1):  # Show first 5
+            title = epic.get('title', 'Untitled')
+            num_stories = len(epic.get('stories', []))
+            print(f"  {i}. {title} ({num_stories} stories)")
+        
+        if len(epics) > 5:
+            print(f"  ... and {len(epics) - 5} more")
+        
+        return approval_id
 
     def _update_summary_counts(self, decomposed_file: str) -> None:
         """Update summary counts from decomposed backlog."""

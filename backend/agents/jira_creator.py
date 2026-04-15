@@ -1,4 +1,4 @@
-﻿"""
+"""
 Jira Creator Agent - Phase 5
 
 Creates Epics, Stories, and Sub-tasks in Jira from decomposed backlog.
@@ -125,7 +125,10 @@ class JiraCreatorAgent:
         # Duplicate detection configuration
         self.check_duplicates = True
         self.duplicate_threshold = 0.85  # 85% similarity = duplicate
-        self.duplicate_action = "warn"  # warn, skip, or error
+        self.duplicate_action = "skip"  # warn, skip, or error
+        # "skip" = Use existing epic instead of creating duplicate
+        # "warn" = Create anyway but show warning
+        # "error" = Stop execution if duplicate found
 
     def load_decomposed_backlog(self, backlog_path: str) -> Dict:
         """
@@ -230,21 +233,34 @@ class JiraCreatorAgent:
         epic_title = epic.get('title', 'Untitled Epic')
         
         # ═══════════════════════════════════════════════════════════════════
-        # IDEMPOTENCY CHECK: Skip if already created
+        # IDEMPOTENCY CHECK: Skip if already created (with Jira verification)
         # ═══════════════════════════════════════════════════════════════════
         if epic_id in self.creation_result.id_mapping:
             existing_key = self.creation_result.id_mapping[epic_id]
-            logger.info(f"Epic {epic_id} already created as {existing_key}, skipping")
-            print(f"    Epic already exists: {existing_key}")
             
-            return JiraEpic(
-                epic_id=epic_id,
-                jira_key=existing_key,
-                title=epic_title,
-                wsjf_score=epic.get('wsjf_score', 0.0),
-                priority_rank=epic.get('priority_rank', 0),
-                success=True
-            )
+            # IMPORTANT: Verify ticket actually exists in Jira
+            from backend.db.crud import verify_jira_ticket_exists
+            
+            if verify_jira_ticket_exists(existing_key):
+                logger.info(f"Epic {epic_id} already created as {existing_key} (verified in Jira), skipping")
+                print(f"    Epic already exists: {existing_key} ✅")
+                
+                return JiraEpic(
+                    epic_id=epic_id,
+                    jira_key=existing_key,
+                    title=epic_title,
+                    wsjf_score=epic.get('wsjf_score', 0.0),
+                    priority_rank=epic.get('priority_rank', 0),
+                    success=True
+                )
+            else:
+                logger.warning(
+                    f"Epic {epic_id} was mapped to {existing_key}, "
+                    f"but ticket no longer exists in Jira. Will recreate."
+                )
+                print(f"    Epic {existing_key} not found in Jira, recreating...")
+                # Remove from mapping and continue with creation
+                del self.creation_result.id_mapping[epic_id]
         
         logger.info(f"Creating Epic in Jira: {epic_title} ({epic_id})")
         print(f"  Creating Epic: {epic_title}")
@@ -384,20 +400,33 @@ class JiraCreatorAgent:
         story_title = story.get('title', 'Untitled Story')
         
         # ═══════════════════════════════════════════════════════════════════
-        # IDEMPOTENCY CHECK: Skip if already created
+        # IDEMPOTENCY CHECK: Skip if already created (with Jira verification)
         # ═══════════════════════════════════════════════════════════════════
         if story_id in self.creation_result.id_mapping:
             existing_key = self.creation_result.id_mapping[story_id]
-            logger.debug(f"Story {story_id} already created as {existing_key}, skipping")
-            print(f"      Story already exists: {existing_key}")
             
-            return JiraStory(
-                story_id=story_id,
-                jira_key=existing_key,
-                title=story_title,
-                story_points=story.get('story_points'),
-                success=True
-            )
+            # IMPORTANT: Verify ticket actually exists in Jira
+            from backend.db.crud import verify_jira_ticket_exists
+            
+            if verify_jira_ticket_exists(existing_key):
+                logger.debug(f"Story {story_id} already created as {existing_key} (verified in Jira), skipping")
+                print(f"      Story already exists: {existing_key} ✅")
+                
+                return JiraStory(
+                    story_id=story_id,
+                    jira_key=existing_key,
+                    title=story_title,
+                    story_points=story.get('story_points'),
+                    success=True
+                )
+            else:
+                logger.warning(
+                    f"Story {story_id} was mapped to {existing_key}, "
+                    f"but ticket no longer exists in Jira. Will recreate."
+                )
+                print(f"      Story {existing_key} not found in Jira, recreating...")
+                # Remove from mapping and continue with creation
+                del self.creation_result.id_mapping[story_id]
         
         logger.debug(f"Creating Story in Jira: {story_title} ({story_id})")
         print(f"    Creating Story: {story_title[:60]}...")
@@ -497,21 +526,34 @@ class JiraCreatorAgent:
         task_title = task.get('title', 'Untitled Task')
         
         # ═══════════════════════════════════════════════════════════════════
-        # IDEMPOTENCY CHECK: Skip if already created
+        # IDEMPOTENCY CHECK: Skip if already created (with Jira verification)
         # ═══════════════════════════════════════════════════════════════════
         if task_id in self.creation_result.id_mapping:
             existing_key = self.creation_result.id_mapping[task_id]
-            logger.debug(f"Task {task_id} already created as {existing_key}, skipping")
-            print(f"          Task already exists: {existing_key}")
             
-            return JiraTask(
-                task_id=task_id,
-                jira_key=existing_key,
-                title=task_title,
-                estimated_hours=task.get('estimated_hours', 0),
-                story_points=task.get('story_points'),
-                success=True
-            )
+            # IMPORTANT: Verify ticket actually exists in Jira
+            from backend.db.crud import verify_jira_ticket_exists
+            
+            if verify_jira_ticket_exists(existing_key):
+                logger.debug(f"Task {task_id} already created as {existing_key} (verified in Jira), skipping")
+                print(f"          Task already exists: {existing_key} ✅")
+                
+                return JiraTask(
+                    task_id=task_id,
+                    jira_key=existing_key,
+                    title=task_title,
+                    estimated_hours=task.get('estimated_hours', 0),
+                    story_points=task.get('story_points'),
+                    success=True
+                )
+            else:
+                logger.warning(
+                    f"Task {task_id} was mapped to {existing_key}, "
+                    f"but ticket no longer exists in Jira. Will recreate."
+                )
+                print(f"          Task {existing_key} not found in Jira, recreating...")
+                # Remove from mapping and continue with creation
+                del self.creation_result.id_mapping[task_id]
         
         logger.debug(f"Creating Sub-task in Jira: {task_title} ({task_id})")
         print(f"        Creating Sub-task: {task_title[:50]}...")

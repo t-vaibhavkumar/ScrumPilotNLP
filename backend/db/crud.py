@@ -1289,3 +1289,208 @@ def count_tables(session: Session) -> int:
         AND table_type = 'BASE TABLE'
     """)
     return session.execute(stmt).scalar()
+
+
+
+# ── Jira Synchronization Functions ───────────────────────────────────────────
+
+
+def verify_jira_ticket_exists(jira_key: str) -> bool:
+    """
+    Verify that a Jira ticket actually exists.
+    
+    This function checks if a ticket exists in Jira by attempting to fetch it.
+    Used to detect when tickets have been manually deleted from Jira.
+    
+    Args:
+        jira_key: Jira ticket key (e.g., 'SP-123')
+    
+    Returns:
+        True if ticket exists in Jira, False otherwise
+    """
+    from backend.tools.jira_client import JiraManager
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    try:
+        jira = JiraManager()
+        jira.client.issue(jira_key)
+        return True
+    except Exception as e:
+        logger.debug(f"Ticket {jira_key} not found in Jira: {e}")
+        return False
+
+
+def sync_epic_with_jira(session: Session, epic_id: int) -> bool:
+    """
+    Verify epic exists in Jira and remove from database if not.
+    
+    Args:
+        session: Database session
+        epic_id: Epic ID
+    
+    Returns:
+        True if epic exists in Jira, False if deleted from database
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    epic = session.query(Epic).filter(Epic.id == epic_id).first()
+    
+    if not epic:
+        return False
+    
+    if not epic.jira_key:
+        # No Jira key, can't verify
+        return True
+    
+    # Check if exists in Jira
+    if not verify_jira_ticket_exists(epic.jira_key):
+        logger.warning(f"Epic {epic.jira_key} not found in Jira, removing from database")
+        session.delete(epic)
+        session.commit()
+        return False
+    
+    return True
+
+
+def sync_story_with_jira(session: Session, story_id: int) -> bool:
+    """
+    Verify story exists in Jira and remove from database if not.
+    
+    Args:
+        session: Database session
+        story_id: Story ID
+    
+    Returns:
+        True if story exists in Jira, False if deleted from database
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    story = session.query(Story).filter(Story.id == story_id).first()
+    
+    if not story:
+        return False
+    
+    if not story.jira_key:
+        # No Jira key, can't verify
+        return True
+    
+    # Check if exists in Jira
+    if not verify_jira_ticket_exists(story.jira_key):
+        logger.warning(f"Story {story.jira_key} not found in Jira, removing from database")
+        session.delete(story)
+        session.commit()
+        return False
+    
+    return True
+
+
+def sync_task_with_jira(session: Session, task_id: int) -> bool:
+    """
+    Verify task exists in Jira and remove from database if not.
+    
+    Args:
+        session: Database session
+        task_id: Task ID
+    
+    Returns:
+        True if task exists in Jira, False if deleted from database
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    task = session.query(BacklogTask).filter(BacklogTask.id == task_id).first()
+    
+    if not task:
+        return False
+    
+    if not task.jira_key:
+        # No Jira key, can't verify
+        return True
+    
+    # Check if exists in Jira
+    if not verify_jira_ticket_exists(task.jira_key):
+        logger.warning(f"Task {task.jira_key} not found in Jira, removing from database")
+        session.delete(task)
+        session.commit()
+        return False
+    
+    return True
+
+
+def sync_all_with_jira(session: Session) -> dict:
+    """
+    Sync all database records with Jira.
+    
+    Removes records that don't exist in Jira anymore.
+    This should be run periodically (e.g., daily) to keep database clean.
+    
+    Args:
+        session: Database session
+    
+    Returns:
+        dict with sync statistics:
+        - epics_checked: Number of epics checked
+        - epics_deleted: Number of epics deleted
+        - stories_checked: Number of stories checked
+        - stories_deleted: Number of stories deleted
+        - tasks_checked: Number of tasks checked
+        - tasks_deleted: Number of tasks deleted
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    stats = {
+        'epics_checked': 0,
+        'epics_deleted': 0,
+        'stories_checked': 0,
+        'stories_deleted': 0,
+        'tasks_checked': 0,
+        'tasks_deleted': 0
+    }
+    
+    logger.info("Starting database sync with Jira...")
+    
+    # Check epics
+    epics = session.query(Epic).filter(Epic.jira_key.isnot(None)).all()
+    stats['epics_checked'] = len(epics)
+    logger.info(f"Checking {len(epics)} epic(s)...")
+    
+    for epic in epics:
+        if not verify_jira_ticket_exists(epic.jira_key):
+            logger.warning(f"Deleting stale epic: {epic.jira_key} (ID: {epic.id})")
+            session.delete(epic)
+            stats['epics_deleted'] += 1
+    
+    # Check stories
+    stories = session.query(Story).filter(Story.jira_key.isnot(None)).all()
+    stats['stories_checked'] = len(stories)
+    logger.info(f"Checking {len(stories)} story(ies)...")
+    
+    for story in stories:
+        if not verify_jira_ticket_exists(story.jira_key):
+            logger.warning(f"Deleting stale story: {story.jira_key} (ID: {story.id})")
+            session.delete(story)
+            stats['stories_deleted'] += 1
+    
+    # Check tasks
+    tasks = session.query(BacklogTask).filter(BacklogTask.jira_key.isnot(None)).all()
+    stats['tasks_checked'] = len(tasks)
+    logger.info(f"Checking {len(tasks)} task(s)...")
+    
+    for task in tasks:
+        if not verify_jira_ticket_exists(task.jira_key):
+            logger.warning(f"Deleting stale task: {task.jira_key} (ID: {task.id})")
+            session.delete(task)
+            stats['tasks_deleted'] += 1
+    
+    # Commit all deletions
+    session.commit()
+    
+    logger.info(f"Sync complete: Deleted {stats['epics_deleted']} epics, "
+                f"{stats['stories_deleted']} stories, {stats['tasks_deleted']} tasks")
+    
+    return stats
