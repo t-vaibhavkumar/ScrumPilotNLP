@@ -32,6 +32,11 @@ from backend.telegram.handlers import (
     callback_handler,
     message_handler,
 )
+from backend.telegram.handlers.nlp_meeting_handler import (
+    handle_meeting,
+    handle_done,
+    handle_nlp_callback,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -57,16 +62,27 @@ class ScrumPilotBot:
         self.application = Application.builder().token(self.config.BOT_TOKEN).build()
         
         # Register command handlers
-        self.application.add_handler(CommandHandler("start", start_handler.handle_start))
-        self.application.add_handler(CommandHandler("help", help_handler.handle_help))
+        self.application.add_handler(CommandHandler("start",     start_handler.handle_start))
+        self.application.add_handler(CommandHandler("help",      help_handler.handle_help))
         self.application.add_handler(CommandHandler("approvals", approval_handler.handle_approvals))
-        self.application.add_handler(CommandHandler("sprint", sprint_handler.handle_sprint))
-        self.application.add_handler(CommandHandler("status", sprint_handler.handle_status))
-        self.application.add_handler(CommandHandler("team", sprint_handler.handle_team))
-        
+        self.application.add_handler(CommandHandler("sprint",    sprint_handler.handle_sprint))
+        self.application.add_handler(CommandHandler("status",    sprint_handler.handle_status))
+        self.application.add_handler(CommandHandler("team",      sprint_handler.handle_team))
+
+        # ── NLP Meeting commands (Units 1–4 pipeline) ──────
+        self.application.add_handler(CommandHandler("meeting",   handle_meeting))
+        self.application.add_handler(CommandHandler("done",      handle_done))
+
         # Register callback query handler (for inline buttons)
-        self.application.add_handler(CallbackQueryHandler(callback_handler.handle_callback))
-        
+        self.application.add_handler(CallbackQueryHandler(
+            callback_handler.handle_callback,
+            pattern="^(?!nlp_)"          # existing: anything NOT starting with nlp_
+        ))
+        self.application.add_handler(CallbackQueryHandler(
+            handle_nlp_callback,
+            pattern="^nlp_"              # NLP inline buttons
+        ))
+
         # Register message handler (for conversation flows)
         self.application.add_handler(
             MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler.handle_message)
