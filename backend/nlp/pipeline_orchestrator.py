@@ -21,33 +21,24 @@ All models are loaded lazily and cached between calls.
 =============================================================
 """
 
+import os
 import logging
 import time
 from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
+# ── Model persistence directory ───────────────────────────
+MODEL_DIR = os.path.join(os.path.dirname(__file__), "models")
+os.makedirs(MODEL_DIR, exist_ok=True)
 
-# ── Story backlog (loaded from DB/config in production) ───
-# Using demo stories here; replace with real Jira query
-DEFAULT_STORIES = [
-    "Implement user authentication and secure login with JWT tokens",
-    "Integrate Stripe payment gateway for online checkout processing",
-    "Build real-time sprint analytics dashboard with burndown charts",
-    "Set up CI/CD pipeline with GitHub Actions and Docker containers",
-    "Create push notification system for email and SMS delivery",
-    "Design REST API for user profile management and settings",
-    "Add OAuth2 social login with Google and GitHub providers",
-    "Build automated test suite with unit and integration tests",
-]
-DEFAULT_STORY_IDS = [f"SP-{i+1:03d}" for i in range(len(DEFAULT_STORIES))]
-
-# Training data — imported directly from the classifier modules
-# (they use integer labels: PM_MEETING=0, SPRINT_PLANNING=1, STANDUP=2)
-from backend.nlp.unit2_models.lstm_classifier import TRAINING_DATA as LSTM_TRAINING_DATA
-from backend.nlp.unit2_models.gru_classifier  import TRAINING_DATA as GRU_TRAINING_DATA
-
-
+# ── Agile-domain training data (300+ samples) ────────────
+from backend.nlp.training_data import (
+    LSTM_TRAINING_DATA,
+    GRU_TRAINING_DATA,
+    LSTM_LABEL_MAP,
+    GRU_LABEL_MAP,
+)
 
 class NLPOrchestrator:
     """
@@ -59,10 +50,23 @@ class NLPOrchestrator:
     """
 
     def __init__(self, stories: List[str] = None, story_ids: List[str] = None):
-        # Try to load real Jira stories; fall back to defaults
-        jira_stories, jira_ids = self._load_jira_stories()
-        self.stories   = stories   or jira_stories or DEFAULT_STORIES
-        self.story_ids = story_ids or jira_ids     or DEFAULT_STORY_IDS
+        # ── 1. Try PostgreSQL context (active sprint stories + assignments) ──
+        self.sprint_context = self._load_context()
+
+        # ── 2. SBERT corpus: prefer DB stories → Jira API → hardcoded default
+        if self.sprint_context and self.sprint_context.story_titles:
+            self.stories   = self.sprint_context.story_titles
+            self.story_ids = self.sprint_context.story_keys
+            logger.info(
+                f"Context loaded from DB: '{self.sprint_context.sprint_name}' | "
+                f"{len(self.stories)} stories | "
+                f"{len(self.sprint_context.assignments)} assignments"
+            )
+        else:
+            # Fall back to Jira API
+            jira_stories, jira_ids = self._load_jira_stories()
+            self.stories   = stories   or jira_stories or DEFAULT_STORIES
+            self.story_ids = story_ids or jira_ids     or DEFAULT_STORY_IDS
 
         # Lazy-loaded model caches
         self._sbert     = None
@@ -72,6 +76,16 @@ class NLPOrchestrator:
         self._lstm_vocab= None
         self._gru       = None
         self._gru_vocab = None
+
+    @staticmethod
+    def _load_context():
+        """Load SprintContext from PostgreSQL. Returns None on any failure."""
+        try:
+            from backend.nlp.context_loader import load_sprint_context
+            return load_sprint_context()
+        except Exception as e:
+            logger.warning(f"SprintContext unavailable: {e}")
+            return None
 
     @staticmethod
     def _load_jira_stories() -> tuple:
@@ -112,22 +126,92 @@ class NLPOrchestrator:
             self._bart = _load_bart()
         return self._bart
 
+    # ── Model persistence helpers ──────────────────────────
+
+    @staticmethod
+    def _model_path(name: str) -> str:
+        return os.path.join(MODEL_DIR, name)
+
+    @staticmethod
+    def _save_model(model, vocab, name: str):
+        """Save trained model + vocab to disk."""
+        import torch, pickle
+        torch.save(model.state_dict(), NLPOrchestrator._model_path(f"{name}.pt"))
+        with open(NLPOrchestrator._model_path(f"{name}.vocab"), "wb") as f:
+            pickle.dump(vocab, f)
+        logger.info(f"  Saved {name} model to disk")
+
+    @staticmethod
+    def _load_model_weights(model, name: str):
+        """Load saved weights into a model instance (in-place)."""
+        import torch
+        path = NLPOrchestrator._model_path(f"{name}.pt")
+        model.load_state_dict(torch.load(path, weights_only=True))
+        return model
+
+    @staticmethod
+    def _load_vocab(name: str):
+        import pickle
+        with open(NLPOrchestrator._model_path(f"{name}.vocab"), "rb") as f:
+            return pickle.load(f)
+
+    @staticmethod
+    def _model_exists(name: str) -> bool:
+        p = NLPOrchestrator._model_path
+        return os.path.exists(p(f"{name}.pt")) and os.path.exists(p(f"{name}.vocab"))
+
+    # ── Lazy model loaders with disk cache ────────────────
+
     def _get_lstm(self):
         if self._lstm is None:
-            from backend.nlp.unit2_models.lstm_classifier import train as lstm_train
-            logger.info("Training LSTM classifier …")
-            self._lstm, self._lstm_vocab = lstm_train(
-                LSTM_TRAINING_DATA, epochs=40, lr=1e-3
+            from backend.nlp.unit2_models.lstm_classifier import (
+                train as lstm_train, LSTMClassifier, Vocabulary
             )
+            name = "lstm_meeting_type"
+            if self._model_exists(name):
+                logger.info("  Loading LSTM from disk (skipping re-train) ...")
+                vocab = self._load_vocab(name)
+                model = LSTMClassifier(
+                    vocab_size=len(vocab),
+                    embed_dim=128,
+                    num_classes=len(LSTM_LABEL_MAP),
+                    num_layers=1,
+                    dropout=0.3
+                )
+                self._load_model_weights(model, name)
+                model.eval()
+            else:
+                logger.info("Training LSTM classifier (first run - will save to disk) ...")
+                model, vocab = lstm_train(
+                    LSTM_TRAINING_DATA, epochs=60, lr=1e-3
+                )
+                self._save_model(model, vocab, name)
+            self._lstm, self._lstm_vocab = model, vocab
         return self._lstm, self._lstm_vocab
 
     def _get_gru(self):
         if self._gru is None:
-            from backend.nlp.unit2_models.gru_classifier import train as gru_train
-            logger.info("Training GRU classifier …")
-            self._gru, self._gru_vocab = gru_train(
-                GRU_TRAINING_DATA, epochs=50, lr=1e-3
+            from backend.nlp.unit2_models.gru_classifier import (
+                train as gru_train, GRUClassifier, Vocabulary
             )
+            name = "gru_action_type"
+            if self._model_exists(name):
+                logger.info("  Loading GRU from disk (skipping re-train) ...")
+                vocab = self._load_vocab(name)
+                model = GRUClassifier(
+                    vocab_size=len(vocab),
+                    num_classes=len(GRU_LABEL_MAP),
+                    dropout=0.5
+                )
+                self._load_model_weights(model, name)
+                model.eval()
+            else:
+                logger.info("Training GRU classifier (first run - will save to disk) ...")
+                model, vocab = gru_train(
+                    GRU_TRAINING_DATA, epochs=80, lr=5e-4
+                )
+                self._save_model(model, vocab, name)
+            self._gru, self._gru_vocab = model, vocab
         return self._gru, self._gru_vocab
 
     # ── Internal helpers ──────────────────────────────────
@@ -261,29 +345,58 @@ class NLPOrchestrator:
 
         logger.info(f"  Unit 2 GRU: {len(raw_actions)} sentences classified")
 
-        # ── UNIT 3: Story mapping (SBERT) ─────────────────
+        # ── UNIT 3: Story mapping (SBERT) ─────────────────────────────────────────────
         from backend.nlp.unit3_transformers.sentence_bert import find_matching_story
         sbert = self._get_sbert()
+
+        # Context-aware actor resolution: use DB assignments before falling back to NER
+        ctx_assignments = (
+            self.sprint_context.assignments if self.sprint_context else {}
+        )
 
         actions_with_stories = []
         for a in raw_actions:
             if a["action"] == "no_action":
                 continue
-            matches = find_matching_story(
-                a["sentence"], self.stories, self.story_ids,
-                sbert, top_k=1, threshold=0.0
-            )
-            if matches:
-                a["story_id"]    = matches[0]["story_id"]
-                a["story_title"] = matches[0]["title"]
-                a["story_score"] = matches[0]["score"]
+
+            # Actor resolution: DB assignment → SBERT semantic search
+            actor_lower = (a["actor"] or "").lower().strip()
+            assigned_key = ctx_assignments.get(actor_lower)
+
+            if assigned_key:
+                # Known sprint assignment — exact match, no SBERT needed
+                a["story_id"]    = assigned_key
+                a["story_title"] = next(
+                    (t for t, k in zip(self.stories, self.story_ids) if k == assigned_key),
+                    assigned_key
+                )
+                a["story_score"] = 1.0
+                a["matched_via"] = "db_assignment"
             else:
-                a["story_id"]    = None
-                a["story_title"] = None
-                a["story_score"] = 0.0
+                # Semantic search via SBERT
+                matches = find_matching_story(
+                    a["sentence"], self.stories, self.story_ids,
+                    sbert, top_k=1, threshold=0.0
+                )
+                if matches:
+                    a["story_id"]    = matches[0]["story_id"]
+                    a["story_title"] = matches[0]["title"]
+                    a["story_score"] = matches[0]["score"]
+                    a["matched_via"] = "sbert"
+                else:
+                    a["story_id"]    = None
+                    a["story_title"] = None
+                    a["story_score"] = 0.0
+                    a["matched_via"] = "none"
             actions_with_stories.append(a)
 
-        logger.info(f"  Unit 3 SBERT: {len(actions_with_stories)} actions mapped")
+        n_db  = sum(1 for a in actions_with_stories if a.get("matched_via") == "db_assignment")
+        n_sb  = sum(1 for a in actions_with_stories if a.get("matched_via") == "sbert")
+        logger.info(
+            f"  Unit 3 SBERT: {len(actions_with_stories)} actions mapped "
+            f"(db_assignment={n_db}, sbert={n_sb})"
+        )
+
 
         # ── UNIT 4: Abstractive summary (BART) ────────────
         from backend.nlp.unit4_applications.summarizer import abstractive_summarize
@@ -309,13 +422,48 @@ class NLPOrchestrator:
         )
 
         if meeting_type == "PM_MEETING":
-            epics           = self._extract_epics_from_pm_meeting(sentences, entities)
-            approval_payload = map_pm_meeting_epics(summary_abstract, entities, epics)
-            approval_type    = "epic_creation"
+            # Use real DB epics when available, otherwise extract from transcript
+            if self.sprint_context and self.sprint_context.epic_titles:
+                db_epics = [
+                    {
+                        "title":            t[:80],
+                        "description":      t,
+                        "business_value":   8,
+                        "time_criticality": 7,
+                        "risk_reduction":   5,
+                        "effort":           5,
+                        "wsjf": {"wsjf_score": 4.0, "cost_of_delay": 20, "job_size": 5},
+                        "rank": i + 1,
+                        "jira_key": self.sprint_context.epic_keys[i] if i < len(self.sprint_context.epic_keys) else None,
+                        "source": "database",
+                    }
+                    for i, t in enumerate(self.sprint_context.epic_titles)
+                ]
+                approval_payload = map_pm_meeting_epics(summary_abstract, entities, db_epics)
+            else:
+                epics = self._extract_epics_from_pm_meeting(sentences, entities)
+                approval_payload = map_pm_meeting_epics(summary_abstract, entities, epics)
+            approval_type = "epic_creation"
 
         elif meeting_type == "SPRINT_PLANNING":
+            sprint_meta = {}
+            if self.sprint_context:
+                sprint_meta = {
+                    "sprint_name":     self.sprint_context.sprint_name,
+                    "sprint_goal":     self.sprint_context.sprint_goal,
+                    "sprint_number":   self.sprint_context.sprint_number,
+                    "capacity_hours":  self.sprint_context.capacity_hours,
+                    "velocity_target": self.sprint_context.velocity_target,
+                    "velocity_actual": self.sprint_context.velocity_actual,
+                    "team_size":       self.sprint_context.team_size,
+                    "committed_stories": [
+                        {"key": s.get("jira_key"), "title": s.get("title"),
+                         "points": s.get("story_points"), "status": s.get("sprint_status")}
+                        for s in (self.sprint_context.stories or [])
+                    ],
+                }
             approval_payload = map_sprint_planning(
-                summary_abstract, entities, actions_with_stories
+                summary_abstract, entities, actions_with_stories, sprint_meta
             )
             approval_type = "sprint_planning"
 

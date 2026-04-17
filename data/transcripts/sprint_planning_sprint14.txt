@@ -1,0 +1,48 @@
+MEETING TYPE: Sprint Planning
+DATE: 2026-04-14
+SPRINT: Sprint 14
+PARTICIPANTS: Sarah (Scrum Master), Mike, Alice, Tom, Bob, David (Product Owner)
+
+---
+
+DAVID: Good morning everyone. Before we start, the sprint goal for Sprint 14 is to deliver the complete checkout experience including payment, order confirmation, and email receipt. Let us confirm capacity and then pull in stories.
+
+SARAH: Team capacity check — Alice is on leave for two days, so we have reduced capacity. Total available is around seventy hours this sprint. Let us cap commitment at twenty-six story points.
+
+DAVID: Agreed. I have refined the top stories in the backlog. Let us start with the highest priority items.
+
+SARAH: First story: Stripe Payment Gateway Integration — eight story points. Mike, you said you were interested in this one?
+
+MIKE: Yes, I will take the Stripe payment gateway integration. I have worked with Stripe before so I am confident in the estimate.
+
+SARAH: Great. Mike takes SP-14. Next — Order Confirmation Email story — five points. Alice?
+
+ALICE: I can take the email confirmation story. Five points sounds right given the email template work.
+
+SARAH: Alice takes SP-15. Now the CI/CD pipeline setup — this is a carry-over from Sprint 13. Bob, you were already working on this.
+
+BOB: Yes, I will continue the CI pipeline story. I would say three more points to finish it. The Docker networking issue is nearly resolved.
+
+SARAH: Bob carries over SP-09 with three remaining points. Next — User Authentication Session Management — eight points. Tom?
+
+TOM: I will take the session management story. I just finished the OAuth work so I am well placed for this.
+
+SARAH: Tom takes SP-16. That gives us twenty-four points. We have two points of buffer. Should we pull in the search autocomplete spike?
+
+DAVID: Yes, let us add the search autocomplete spike as a stretch goal — two points. It is low risk since it is just investigation.
+
+SARAH: Agreed. Total commitment is twenty-six story points. Sprint starts Monday, ends in two weeks. Sprint review is on the last Friday.
+
+DAVID: Sprint goal confirmed — deliver complete checkout experience. Let us make sure all stories have acceptance criteria written before Monday.
+
+SARAH: We need a ticket for the missing API contract before Bob can continue. Can someone open that action item in Jira?
+
+DAVID: I will create a task for the API contract documentation today.
+
+SARAH: Great. Any dependencies or blockers we need to flag before we close?
+
+TOM: The session management story depends on the Stripe integration being stable. Mike, can we sync early in the sprint?
+
+MIKE: Absolutely. I will aim to have a working Stripe integration by Wednesday so you can start the session work.
+
+SARAH: Perfect. Sprint planning is done. I will update the Jira board now. See everyone Monday.

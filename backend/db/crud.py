@@ -1494,3 +1494,90 @@ def sync_all_with_jira(session: Session) -> dict:
                 f"{stats['stories_deleted']} stories, {stats['tasks_deleted']} tasks")
     
     return stats
+
+
+# ── Context-Aware NLP Queries ─────────────────────────────────────────────────
+
+
+def get_active_sprint(session: Session) -> Optional["Sprint"]:
+    """
+    Return the currently active sprint, or the most recent planned/completed
+    one as a fallback.  Used by the NLP context loader to seed the SBERT corpus.
+    """
+    from backend.db.models import Sprint
+
+    # 1. Prefer explicitly active sprint
+    stmt = (
+        select(Sprint)
+        .where(Sprint.status == "active")
+        .order_by(Sprint.start_date.desc())
+        .limit(1)
+    )
+    sprint = session.execute(stmt).scalar_one_or_none()
+    if sprint:
+        return sprint
+
+    # 2. Fall back to most recent sprint regardless of status
+    stmt = select(Sprint).order_by(Sprint.start_date.desc()).limit(1)
+    return session.execute(stmt).scalar_one_or_none()
+
+
+def get_sprint_stories_with_details(session: Session, sprint_id: int) -> List[dict]:
+    """
+    Return all stories committed to a sprint, enriched with their epic info.
+    Each dict has the fields the SBERT corpus + approval payload need:
+        title, description, jira_key, story_id, epic_title, epic_jira_key,
+        story_points, status, jira_status
+    """
+    from backend.db.models import Sprint, SprintStory, Story, Epic
+
+    stmt = (
+        select(
+            Story.id.label("story_id"),
+            Story.title.label("title"),
+            Story.description.label("description"),
+            Story.jira_key.label("jira_key"),
+            Story.jira_status.label("jira_status"),
+            SprintStory.story_points.label("story_points"),
+            SprintStory.status.label("sprint_status"),
+            Epic.title.label("epic_title"),
+            Epic.jira_key.label("epic_jira_key"),
+        )
+        .join(SprintStory, SprintStory.story_id == Story.id)
+        .outerjoin(Epic, Epic.id == Story.epic_id)
+        .where(SprintStory.sprint_id == sprint_id)
+        .order_by(SprintStory.committed_at)
+    )
+    rows = session.execute(stmt).mappings().all()
+    return [dict(r) for r in rows]
+
+
+def get_sprint_assignments(session: Session, sprint_id: int) -> dict:
+    """
+    Return a dictionary mapping developer name → jira_key of their assigned story.
+    Used by the NLP pipeline to resolve actor names from meeting transcripts
+    to specific Jira ticket keys without calling the Jira API.
+
+    Example return:
+        {"alice": "SP-003", "tom": "SP-001", "bob": "SP-007"}
+    """
+    from backend.db.models import SprintAssignment, User, Story
+
+    stmt = (
+        select(
+            User.display_name.label("user_name"),
+            Story.jira_key.label("story_key"),
+        )
+        .join(User, User.id == SprintAssignment.user_id)
+        .outerjoin(Story, Story.id == SprintAssignment.story_id)
+        .where(SprintAssignment.sprint_id == sprint_id)
+        .where(SprintAssignment.story_id.isnot(None))
+    )
+    rows = session.execute(stmt).mappings().all()
+
+    # Normalise name → lowercase for case-insensitive matching in the pipeline
+    assignments: dict = {}
+    for r in rows:
+        if r["user_name"] and r["story_key"]:
+            assignments[r["user_name"].lower().strip()] = r["story_key"]
+    return assignments

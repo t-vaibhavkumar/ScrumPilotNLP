@@ -179,15 +179,20 @@ def map_sprint_planning(
     summary_text: str,
     entities:     Dict,
     actions:      List[Dict],
-    meeting_type: str = "SPRINT_PLANNING",
+    sprint_meta:  Optional[Dict] = None,
 ) -> Dict:
     """
     Build sprint_data dict for:
         ApprovalService.create_sprint_approval(sprint_data, ...)
 
+    Args:
+        sprint_meta: Optional dict from SprintContext (DB data).
+                     Keys: sprint_name, sprint_goal, sprint_number,
+                           capacity_hours, velocity_target, velocity_actual,
+                           team_size, committed_stories
     Returns:
         {
-          "sprint_name": "Sprint N",
+          "sprint_name": "Sprint 13",
           "sprint_goal": "...",
           "story_ids":   ["SP-001", ...],
           "stories":     [...],
@@ -195,21 +200,26 @@ def map_sprint_planning(
           ...
         }
     """
-    # Parse sprint name and goal from entities
-    sprint_name = "Next Sprint"
-    capacity    = 80
+    meta = sprint_meta or {}
 
-    # Extract capacity from estimates if present
-    for est in entities.get("estimates", []):
-        try:
-            val = int(re.sub(r"[^\d]", "", str(est)))
-            if 20 <= val <= 200:   # plausible capacity
-                capacity = val
-                break
-        except ValueError:
-            pass
+    # Prefer DB sprint name; fall back to heuristic extraction
+    sprint_name = meta.get("sprint_name") or "Next Sprint"
+    sprint_goal = meta.get("sprint_goal") or summary_text[:150]
 
-    # Collect story IDs from NLP action mapping
+    # Capacity: prefer DB; fall back to parsing estimates from transcript
+    capacity = meta.get("capacity_hours")
+    if not capacity:
+        for est in entities.get("estimates", []):
+            try:
+                val = int(re.sub(r"[^\d]", "", str(est)))
+                if 20 <= val <= 200:
+                    capacity = val
+                    break
+            except ValueError:
+                pass
+        capacity = capacity or 80
+
+    # Collect story IDs from NLP action mapping (GRU + SBERT)
     story_ids = list({a.get("story_id") for a in actions if a.get("story_id")})
 
     stories = []
@@ -220,16 +230,22 @@ def map_sprint_planning(
                 "title":       a.get("story_title", a.get("sentence", "")[:60]),
                 "assignee":    a.get("actor", ""),
                 "action_type": a.get("action", ""),
+                "matched_via": a.get("matched_via", "sbert"),
             })
 
     return {
-        "sprint_name":     sprint_name,
-        "sprint_goal":     summary_text[:150],
-        "story_ids":       story_ids,
-        "stories":         stories,
-        "capacity":        capacity,
-        "source":          "nlp_pipeline",
-        "meeting_summary": summary_text,
+        "sprint_name":       sprint_name,
+        "sprint_goal":       sprint_goal,
+        "sprint_number":     meta.get("sprint_number"),
+        "story_ids":         story_ids,
+        "stories":           stories,
+        "capacity_hours":    capacity,
+        "velocity_target":   meta.get("velocity_target"),
+        "velocity_actual":   meta.get("velocity_actual"),
+        "team_size":         meta.get("team_size"),
+        "committed_stories": meta.get("committed_stories", []),  # from DB
+        "source":            "nlp_pipeline",
+        "meeting_summary":   summary_text,
         "nlp_metadata": {
             "model":     "LSTM + GRU + SBERT + DistilBART",
             "assignees": entities.get("assignees", []),
