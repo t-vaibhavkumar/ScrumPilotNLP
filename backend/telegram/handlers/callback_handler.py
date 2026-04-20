@@ -932,117 +932,176 @@ async def execute_story_creation(approval: ApprovalRequest):
 
 async def execute_sprint_planning(approval: ApprovalRequest):
     """
-    Execute sprint planning in Jira.
-    
-    This is called when PM approves the sprint plan.
-    It creates the sprint, moves stories, and assigns developers.
-    
-    The sprint plan was already extracted by the pipeline, so we just need
-    to create everything in Jira using the sprint plan data.
+    Execute sprint planning in Jira and update database.
     """
     from backend.pipelines.sprint_planning_pipeline import SprintPlanningPipeline
+    from backend.tools.jira_client import JiraManager
+    from backend.db.connection import get_session
+    from backend.db import crud
+    from backend.db.models import Story, BacklogTask, Sprint
+    from datetime import datetime, timedelta, timezone
     import json
     from pathlib import Path
     
     # Use approved_data (which may have been edited)
     data = approval.approved_data or approval.request_data
+    created_keys = []
     
-    # Get the sprint plan file path
     sprint_plan_file = data.get('sprint_plan_file')
     
-    if not sprint_plan_file:
-        raise Exception("No sprint plan file found in approval data")
+    # ── LEGACY MODE (FILE-BASED) ────────────────────────────────────────────────
+    if sprint_plan_file:
+        logger.info(f"Creating sprint in Jira from plan file: {sprint_plan_file}")
+        if not Path(sprint_plan_file).exists():
+            raise Exception(f"Sprint plan file not found: {sprint_plan_file}")
+        with open(sprint_plan_file, 'r', encoding='utf-8') as f:
+            sprint_plan_data = json.load(f)
+            
+        pipeline = SprintPlanningPipeline(require_telegram_approval=False)
+        try:
+            from backend.agents.sprint_planning_extractor import SprintPlanningResult
+            sprint_plan = SprintPlanningResult(**sprint_plan_data)
+            jira_result = pipeline._create_sprint_in_jira(sprint_plan)
+            
+            if jira_result.get('sprint_key'):
+                created_keys.append(jira_result['sprint_key'])
+            for story_id in sprint_plan.commitment.story_ids:
+                created_keys.append(story_id)
+            
+            logger.info(f"✅ Successfully created sprint with {len(created_keys)} items (Legacy Mode)")
+            return created_keys
+        except Exception as e:
+            logger.error(f"Failed to create sprint (Legacy): {e}", exc_info=True)
+            raise Exception(f"Failed to create sprint (Legacy): {str(e)}")
+
+    # ── NLP DIRECT PAYLOAD MODE ────────────────────────────────────────────────ـ
+    logger.info("Executing Sprint Planning from NLP Payload")
     
-    logger.info(f"Creating sprint in Jira from plan file: {sprint_plan_file}")
+    sprint_name = data.get('sprint_name', f"Sprint {datetime.now().strftime('%Y-%m-%d')}")
+    sprint_goal = data.get('sprint_goal', '')
+    story_ids   = data.get('story_ids', [])
+    stories     = data.get('stories', [])
     
-    # Load sprint plan
-    if not Path(sprint_plan_file).exists():
-        raise Exception(f"Sprint plan file not found: {sprint_plan_file}")
-    
-    with open(sprint_plan_file, 'r', encoding='utf-8') as f:
-        sprint_plan_data = json.load(f)
-    
-    # Use the pipeline's Jira creation method
-    pipeline = SprintPlanningPipeline(require_telegram_approval=False)
-    
-    try:
-        # Import the sprint planning result model
-        from backend.agents.sprint_planning_extractor import SprintPlanningResult
-        
-        # Reconstruct the sprint plan object
-        sprint_plan = SprintPlanningResult(**sprint_plan_data)
-        
-        # Create sprint in Jira
-        jira_result = pipeline._create_sprint_in_jira(sprint_plan)
-        
-        logger.info(f"Sprint creation complete:")
-        logger.info(f"  Sprint: {jira_result.get('sprint_name')}")
-        logger.info(f"  Stories moved: {jira_result.get('stories_moved', 0)}")
-        logger.info(f"  Tasks assigned: {jira_result.get('tasks_assigned', 0)}")
-        logger.info(f"  Developers: {jira_result.get('developers_assigned', 0)}")
-        
-        # Collect created/updated Jira keys
-        created_keys = []
-        
-        # Add sprint key
-        if jira_result.get('sprint_key'):
-            created_keys.append(jira_result['sprint_key'])
-        
-        # Add story keys
-        for story_id in sprint_plan.commitment.story_ids:
-            created_keys.append(story_id)
-        
-        if jira_result.get('errors'):
-            # Some items failed but continue
-            error_summary = "\n".join(f"• {err[:80]}" for err in jira_result['errors'][:3])
-            if len(jira_result['errors']) > 3:
-                error_summary += f"\n• ... and {len(jira_result['errors']) - 3} more"
-            logger.warning(f"Sprint creation completed with errors:\n{error_summary}")
-        
-        logger.info(f"✅ Successfully created sprint with {len(created_keys)} items")
-        return created_keys
-    
-    except Exception as e:
-        logger.error(f"Failed to create sprint: {e}", exc_info=True)
-        raise Exception(f"Failed to create sprint: {str(e)}")
-    story_ids = data.get('story_ids', [])
-    start_date = data.get('start_date')
-    end_date = data.get('end_date')
-    
-    logger.info(f"Creating sprint: {sprint_name}")
-    
-    jira = JiraManager()
-    
-    # Calculate dates if not provided
-    if not start_date:
-        start_date = datetime.now().strftime('%Y-%m-%d')
-    if not end_date:
+    start_date = data.get('start_date', datetime.now().strftime('%Y-%m-%d'))
+    if not data.get('end_date'):
         start = datetime.strptime(start_date, '%Y-%m-%d')
         end = start + timedelta(weeks=2)
         end_date = end.strftime('%Y-%m-%d')
+    else:
+        end_date = data.get('end_date')
+
+    jira = JiraManager()
     
-    # Create sprint
+    # 1. Create Sprint in Jira
     result = jira.create_sprint(
         name=sprint_name,
         goal=sprint_goal,
         start_date=start_date,
         end_date=end_date
     )
-    
     if not result.get('success'):
         raise Exception(f"Failed to create sprint: {result.get('error')}")
     
     sprint_id = result.get('id')
     sprint_key = result.get('key')
+    logger.info(f"Created sprint in Jira: {sprint_key}")
+    created_keys.append(sprint_key)
     
-    logger.info(f"Created sprint: {sprint_key}")
-    
-    # Move stories to sprint
+    # 2. Move stories to Jira sprint
     if story_ids:
         move_result = jira.move_issues_to_sprint(story_ids, sprint_id)
-        logger.info(f"Moved {move_result.get('moved', 0)} stories to sprint")
-    
-    return [sprint_key]
+        logger.info(f"Moved {move_result.get('moved', 0)} stories to sprint in Jira")
+        created_keys.extend(story_ids)
+        
+    # 3 & 4. Assign Jira tickets and Synchronize Database
+    logger.info("Resolving user identities, assigning Jira tickets, and syncing Database...")
+    try:
+        from backend.db.models import User, SprintAssignment, Team
+        with get_session() as session:
+            # Upsert Sprint
+            db_sprint = session.query(Sprint).filter(Sprint.sprint_name == sprint_name).first()
+            if not db_sprint:
+                # Dynamically resolve Team and User to avoid ForeignKey Violations
+                team = session.query(Team).first()
+                if not team:
+                    team = Team(team_name="Scrum Team", team_lead_id=1)
+                    session.add(team)
+                    session.flush()
+                
+                admin_user = session.query(User).first()
+                admin_id = admin_user.id if admin_user else 1
+
+                db_sprint = crud.create_sprint(
+                    session=session,
+                    sprint_name=sprint_name,
+                    sprint_goal=sprint_goal,
+                    start_date=datetime.strptime(start_date, '%Y-%m-%d').replace(tzinfo=timezone.utc),
+                    end_date=datetime.strptime(end_date, '%Y-%m-%d').replace(tzinfo=timezone.utc),
+                    team_id=team.team_id,
+                    created_by=admin_id
+                )
+            
+            # Update Stories and mapping
+            for s in stories:
+                jira_key = s.get("story_id")
+                assignee_raw = s.get("assignee")
+                if not jira_key:
+                    continue
+                
+                story = session.query(Story).filter(Story.jira_key == jira_key).first()
+                task = session.query(BacklogTask).filter(BacklogTask.jira_key == jira_key).first()
+                
+                assigned_user = None
+                target_jira_assignee = assignee_raw
+
+                if assignee_raw:
+                    # Look up user via exact match or partial match on normalized/display name
+                    assigned_user = session.query(User).filter(
+                        (User.normalized_name.ilike(f"%{assignee_raw}%")) | 
+                        (User.display_name.ilike(f"%{assignee_raw}%"))
+                    ).first()
+                    
+                    if assigned_user and assigned_user.jira_account_id:
+                        target_jira_assignee = assigned_user.jira_account_id
+                    else:
+                        # Fallback for demo environments: Grab the first true Jira human user!
+                        if not getattr(jira, '_demo_human_account_id', None):
+                            humans = [u.accountId for u in jira.client.search_users(query='.') if getattr(u, 'accountType', '') == 'atlassian']
+                            jira._demo_human_account_id = humans[0] if humans else assignee_raw
+                        target_jira_assignee = jira._demo_human_account_id
+
+                    # Instruct Jira
+                    try:
+                        jira.assign_issue(jira_key, target_jira_assignee)
+                        logger.info(f"Assigned {jira_key} to {target_jira_assignee} in Jira")
+                    except Exception as e:
+                        logger.warning(f"Failed to assign {jira_key} to {target_jira_assignee}: {e}")
+
+                # Make PostgreSQL reflections
+                if story:
+                    story.jira_status = "In Progress"
+                    crud.add_story_to_sprint(session, db_sprint.id, story.id, committed_by=1)
+                    if assigned_user:
+                        sa = SprintAssignment(
+                            sprint_id=db_sprint.id, user_id=assigned_user.id, story_id=story.id
+                        )
+                        session.add(sa)
+                elif task:
+                    task.jira_status = "In Progress"
+                    if assigned_user:
+                        task.assignee_user_id = assigned_user.id
+                        task.assignee_raw = assignee_raw
+                        sa = SprintAssignment(
+                            sprint_id=db_sprint.id, user_id=assigned_user.id, task_id=task.id
+                        )
+                        session.add(sa)
+            
+            session.commit()
+            logger.info("✅ Database synchronized for Sprint Planning")
+    except Exception as e:
+        logger.error(f"Failed to sync Database for Sprint Planning: {e}")
+
+    return created_keys
 
 
 
