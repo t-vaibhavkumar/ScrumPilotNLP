@@ -1,0 +1,28 @@
+MEETING TYPE: Daily Standup
+DATE: 2026-04-17
+SPRINT: Sprint 13
+PARTICIPANTS: Mike, Alice, Tom, Bob, Sarah
+
+---
+
+SCRUM MASTER (Sarah): Good morning everyone, let us keep this quick. Mike, you are up first.
+
+MIKE: Good morning. Yesterday I completed the Stripe payment gateway integration and pushed the PR. Today I will be writing unit tests for the checkout flow. No blockers from my side.
+
+SARAH: Great, Alice?
+
+ALICE: Yesterday I was working on the CI pipeline setup. I am still in progress on that, it is taking longer than expected because the Docker networking configuration is tricky. I need one more day. I am blocked on the AWS credentials from the DevOps team — can someone follow up on that?
+
+SARAH: Noted, I will ping DevOps after this. Tom?
+
+TOM: Yesterday I finished the OAuth integration with Google and merged it into main. Today I will start on the user authentication story for the session management feature. No blockers.
+
+SARAH: Perfect. Bob?
+
+BOB: Good morning. I completed the database migration script yesterday and it is ready for review. Today I will be resolving the merge conflicts in the API branch. I also need the API contract from the backend team before I can continue the third-party integration story — that is a blocker for me.
+
+SARAH: I will follow up with the backend team. Sarah, anything from you?
+
+SARAH: I reviewed the security audit findings yesterday. Today I am writing end-to-end tests for the checkout flow. No blockers.
+
+SARAH: Thanks everyone. Summary: Alice is blocked on AWS credentials, Bob is blocked on the API contract. I will sort both out now. Let us all aim to hit our sprint goal by Thursday. See you tomorrow.

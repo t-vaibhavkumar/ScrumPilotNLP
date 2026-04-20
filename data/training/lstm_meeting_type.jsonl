@@ -1,0 +1,300 @@
+{"text": "Good morning everyone let us start the daily standup", "label": 2, "label_name": "STANDUP"}
+{"text": "Yesterday I completed the Stripe payment gateway integration", "label": 2, "label_name": "STANDUP"}
+{"text": "Today I will work on the user authentication story", "label": 2, "label_name": "STANDUP"}
+{"text": "No blockers from my side everything is on track", "label": 2, "label_name": "STANDUP"}
+{"text": "I am blocked waiting for the AWS credentials from DevOps", "label": 2, "label_name": "STANDUP"}
+{"text": "I finished the database migration script this morning", "label": 2, "label_name": "STANDUP"}
+{"text": "Still working on the CI pipeline setup need more time", "label": 2, "label_name": "STANDUP"}
+{"text": "I wrapped up the API endpoints and pushed the PR yesterday", "label": 2, "label_name": "STANDUP"}
+{"text": "Blocked on the design review for the checkout page", "label": 2, "label_name": "STANDUP"}
+{"text": "I completed the login screen implementation", "label": 2, "label_name": "STANDUP"}
+{"text": "Working on the payment flow unit tests today", "label": 2, "label_name": "STANDUP"}
+{"text": "I need help with the Docker networking issue", "label": 2, "label_name": "STANDUP"}
+{"text": "Alice finished the notification service integration", "label": 2, "label_name": "STANDUP"}
+{"text": "I am still working on the search feature need one more day", "label": 2, "label_name": "STANDUP"}
+{"text": "I deployed the hotfix to staging last night", "label": 2, "label_name": "STANDUP"}
+{"text": "No blockers for me today I am continuing the PR review", "label": 2, "label_name": "STANDUP"}
+{"text": "I merged the feature branch after code review feedback", "label": 2, "label_name": "STANDUP"}
+{"text": "Bob is out sick today we will cover his tasks", "label": 2, "label_name": "STANDUP"}
+{"text": "I finished the email template and it is ready for review", "label": 2, "label_name": "STANDUP"}
+{"text": "The integration tests are failing on the CI server", "label": 2, "label_name": "STANDUP"}
+{"text": "I completed the story pointing for the new backlog items", "label": 2, "label_name": "STANDUP"}
+{"text": "I need the API contract from the backend team to unblock me", "label": 2, "label_name": "STANDUP"}
+{"text": "Done with the database schema changes for the new feature", "label": 2, "label_name": "STANDUP"}
+{"text": "I am working on fixing the broken unit tests today", "label": 2, "label_name": "STANDUP"}
+{"text": "Yesterday I reviewed three pull requests from the team", "label": 2, "label_name": "STANDUP"}
+{"text": "I will be finishing the analytics dashboard by end of day", "label": 2, "label_name": "STANDUP"}
+{"text": "Blocked by the missing environment variables in staging", "label": 2, "label_name": "STANDUP"}
+{"text": "I completed the TypeScript migration for the auth module", "label": 2, "label_name": "STANDUP"}
+{"text": "Today I will pair with Alice on the payment story", "label": 2, "label_name": "STANDUP"}
+{"text": "I closed two bugs from the QA backlog yesterday", "label": 2, "label_name": "STANDUP"}
+{"text": "The feature is ready for QA sign-off", "label": 2, "label_name": "STANDUP"}
+{"text": "I am setting up the load tests for the API today", "label": 2, "label_name": "STANDUP"}
+{"text": "Blocked waiting for the third-party API documentation", "label": 2, "label_name": "STANDUP"}
+{"text": "I finished the acceptance criteria review with the PO", "label": 2, "label_name": "STANDUP"}
+{"text": "I deployed the new build to production without issues", "label": 2, "label_name": "STANDUP"}
+{"text": "Yesterday I fixed the race condition in the worker service", "label": 2, "label_name": "STANDUP"}
+{"text": "I need to discuss the architecture change with the tech lead", "label": 2, "label_name": "STANDUP"}
+{"text": "I completed the Kubernetes deployment scripts", "label": 2, "label_name": "STANDUP"}
+{"text": "I am working on improving the query performance today", "label": 2, "label_name": "STANDUP"}
+{"text": "Blocked on the third-party integration approval", "label": 2, "label_name": "STANDUP"}
+{"text": "I finished writing the API documentation yesterday", "label": 2, "label_name": "STANDUP"}
+{"text": "Today I will resolve the merge conflicts in the feature branch", "label": 2, "label_name": "STANDUP"}
+{"text": "I shipped the dark mode feature to production", "label": 2, "label_name": "STANDUP"}
+{"text": "Blocked by the expired SSL certificate on the test server", "label": 2, "label_name": "STANDUP"}
+{"text": "I completed four story points yesterday in the sprint", "label": 2, "label_name": "STANDUP"}
+{"text": "I am refactoring the user service to improve testability", "label": 2, "label_name": "STANDUP"}
+{"text": "Done with the mobile responsive layout for the dashboard", "label": 2, "label_name": "STANDUP"}
+{"text": "Yesterday I reviewed the security audit findings", "label": 2, "label_name": "STANDUP"}
+{"text": "I need an answer on the database scaling approach", "label": 2, "label_name": "STANDUP"}
+{"text": "Today I am writing end-to-end tests for the checkout flow", "label": 2, "label_name": "STANDUP"}
+{"text": "I merged the analytics tracking code into the main branch", "label": 2, "label_name": "STANDUP"}
+{"text": "Blocked because QA found a critical bug in the login flow", "label": 2, "label_name": "STANDUP"}
+{"text": "I am continuing the code review of the payment PR", "label": 2, "label_name": "STANDUP"}
+{"text": "I resolved the performance issue in the search endpoint", "label": 2, "label_name": "STANDUP"}
+{"text": "Today I will complete the sprint burndown chart update", "label": 2, "label_name": "STANDUP"}
+{"text": "I finished the OAuth integration with Google yesterday", "label": 2, "label_name": "STANDUP"}
+{"text": "Blocked waiting for product clarification on the edge case", "label": 2, "label_name": "STANDUP"}
+{"text": "I am continuing the mobile layout work today", "label": 2, "label_name": "STANDUP"}
+{"text": "I updated the ticket status to in progress in Jira", "label": 2, "label_name": "STANDUP"}
+{"text": "My update is that I am still on the data pipeline story", "label": 2, "label_name": "STANDUP"}
+{"text": "I have no blockers and will continue the feature work", "label": 2, "label_name": "STANDUP"}
+{"text": "I pushed the hotfix PR and it is awaiting review", "label": 2, "label_name": "STANDUP"}
+{"text": "Yesterday I unblocked the staging environment issue", "label": 2, "label_name": "STANDUP"}
+{"text": "I need access to the production logs to debug this", "label": 2, "label_name": "STANDUP"}
+{"text": "Today I am focused on the sprint goal deliverable", "label": 2, "label_name": "STANDUP"}
+{"text": "I finished the localization strings for the app yesterday", "label": 2, "label_name": "STANDUP"}
+{"text": "Still debugging the intermittent test flakiness", "label": 2, "label_name": "STANDUP"}
+{"text": "I am waiting for the design team to deliver the mockups", "label": 2, "label_name": "STANDUP"}
+{"text": "The PR has been merged and the ticket is closed", "label": 2, "label_name": "STANDUP"}
+{"text": "I will demo the feature to the team at the end of the day", "label": 2, "label_name": "STANDUP"}
+{"text": "Yesterday I pair programmed with Tom on the auth service", "label": 2, "label_name": "STANDUP"}
+{"text": "I am blocked on access to the third-party sandbox", "label": 2, "label_name": "STANDUP"}
+{"text": "I completed the accessibility improvements for the settings page", "label": 2, "label_name": "STANDUP"}
+{"text": "Today I will wrap up the remaining sub-tasks in the sprint", "label": 2, "label_name": "STANDUP"}
+{"text": "I am on track and expect to complete by tomorrow", "label": 2, "label_name": "STANDUP"}
+{"text": "That is all from me no blockers and nothing else to flag", "label": 2, "label_name": "STANDUP"}
+{"text": "We commit to three stories worth forty story points this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Team capacity is eighty hours for this two-week sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us pull in the authentication epic for sprint thirteen", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Sprint goal is to deliver the payment and auth features", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We have twenty percent capacity reduction due to holidays", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint backlog includes five user stories and two bugs", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "I will take the user authentication story this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We cannot fit the analytics dashboard in this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint velocity last week was thirty-eight points", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We need to groom the backlog before we plan the sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Alice will handle the payment integration story", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are committing to sprint goal: complete checkout flow", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The definition of ready has been met for all selected stories", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us break down the authentication story into sub-tasks", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Bob will take the CI/CD pipeline story this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We have capacity for thirty points based on team availability", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint kicks off Monday and ends in two weeks", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are pulling in the notification feature from the backlog", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Each story needs acceptance criteria before it enters the sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The testing story has eight points and Alice will own it", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us review which epics are ready for this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We agreed to prioritise technical debt stories this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Sprint thirteen goal is to increase the checkout conversion rate", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Mike is taking the API integration story for this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are adding a stretch goal if the team finishes early", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint review will be held on the last Friday", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us estimate the story points for each backlog item", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We use planning poker to agree on story point estimates", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The retrospective showed we overcommitted last sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We should limit work in progress to three items per developer", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The QA story needs to be done before the release story", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We have three developers available full time this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Sprint fourteen will focus on performance improvements", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us assign stories based on skill set and availability", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The carry-over story from last sprint will be picked up first", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We agreed on a sprint goal of shipping the MVP by Friday", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The product owner has refined the top ten backlog items", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We need story point estimates for the new notification stories", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Tom will pair with Alice on the authentication story", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are committing to thirteen story points for this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us identify dependencies between stories before we start", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The team is pulling in the search feature for sprint fifteen", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Sprint capacity is reduced because David is on leave", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are splitting the payment story into two smaller stories", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The deployment story needs to be last in the sprint queue", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us estimate the bug fixes before finalising the sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We need a spike story to investigate the GraphQL migration", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint goal aligns with the Q3 product roadmap", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We agreed the caching story will be our first priority", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us map each story to an acceptance criterion this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Sprint velocity dropped because of unplanned outage work", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are refining stories for the next two sprints today", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The team will complete twenty-six story points this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We will run a two-week sprint starting from Monday", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us review the technical dependencies in the sprint backlog", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The integration story needs an API contract first", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We agreed to cap the sprint at thirty story points", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Bob volunteered to take the DevOps story this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us move the low-priority stories to the next sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint planning session will take two hours", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We need everyone to commit to their stories by end of planning", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The total commitment is thirty-two story points for this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us make sure the sprint backlog is fully estimated", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We should not overcommit given the team holidays this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint board will be set up in Jira after this meeting", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are planning sprint twelve starting this Monday", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Each developer should own no more than two stories per sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The stakeholders approved the Q3 product roadmap", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Business value is nine out of ten for this epic", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to prioritise the payment gateway integration", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The CEO wants the features shipped before the Q2 launch", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Let us review the WSJF scores for the backlog epics", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Risk reduction score for this epic is eight", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The product vision aligns with our revenue growth targets", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We validated the MVP hypothesis with early adopters", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Customers are requesting a mobile app version of the dashboard", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The competitive landscape demands we ship analytics by July", "label": 0, "label_name": "PM_MEETING"}
+{"text": "I am presenting the epics to the leadership team today", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need sign-off from the finance team on the budget", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The OKRs for this quarter focus on user retention", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Let us discuss the go-to-market strategy for the new feature", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Regulatory compliance requires we implement data encryption", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The NPS score dropped which means we need to fix onboarding", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Product demo is scheduled with investors on Thursday", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need a feature flag strategy for the rollout", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The partnership with Stripe requires API changes in Q2", "label": 0, "label_name": "PM_MEETING"}
+{"text": "User research shows customers need bulk export functionality", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We will sunset the legacy API in six months", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The data privacy epic has the highest risk score", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Marketing needs the email campaign feature before the launch", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Let us prioritise epics based on WSJF before the sprint", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The board wants a product roadmap presentation next week", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We are deprioritising the notification system for now", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Customer success flagged three critical pain points", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The SLA requirement is 99.9 percent uptime for production", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to align the backlog with the company OKRs", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Time criticality for the payment feature is very high", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The new epic for analytics dashboard has business value ten", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We should decompose the authentication epic into stories", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The sales team needs CRM integration by end of month", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Our churn rate is up so retention features are top priority", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We approved two new epics in today's product meeting", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The search functionality epic will take three sprints", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to review the product backlog before sprint planning", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The mobile app epic has a job size of eight points", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Let us score each epic for WSJF before the roadmap meeting", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The stakeholder agreed to fund the ML recommendations feature", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We are adding a new epic for GDPR compliance requirements", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The discovery phase for the new feature is complete", "label": 0, "label_name": "PM_MEETING"}
+{"text": "User interviews confirmed the problem we are solving", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to release a hotfix before the product demo", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The API monetisation epic is approved for next quarter", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Let us discuss the definition of done for each epic", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We reviewed the product metrics and churn is increasing", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The technical debt epic needs to be included in the roadmap", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Product roadmap has three core themes for this half", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We are expanding to APAC which requires localisation work", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The design team completed the UX research for payment flows", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to build self-serve onboarding to reduce support load", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The product committee signed off on the Q4 initiatives", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Let us do a feasibility check on the AI recommendation epic", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The growth team is requesting A/B testing infrastructure", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need a webhook system for third-party integrations", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The legal team requires audit logging for all user actions", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We decided to fast-follow the competitor's core feature set", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Customer advisory board flagged reporting as the top gap", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to build a marketplace for plugin integrations", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The pricing page redesign is a high-priority product request", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We are evaluating the feasibility of a native mobile app", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The board approved a budget of fifty thousand for the new feature", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to define the KPIs for each epic before grooming", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The enterprise tier requires SSO support by end of quarter", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We are running a discovery sprint before full commitment", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The product strategy for next year is focused on retention", "label": 0, "label_name": "PM_MEETING"}
+{"text": "I am wrapping up the feature should be done by tomorrow morning", "label": 2, "label_name": "STANDUP"}
+{"text": "My blocker is that the staging DB is not responding", "label": 2, "label_name": "STANDUP"}
+{"text": "Quick update from me I finished the PR and it passed CI", "label": 2, "label_name": "STANDUP"}
+{"text": "Yesterday I spent time debugging a tricky race condition", "label": 2, "label_name": "STANDUP"}
+{"text": "I expect to complete the story by end of sprint", "label": 2, "label_name": "STANDUP"}
+{"text": "No update from my side still on the same task", "label": 2, "label_name": "STANDUP"}
+{"text": "I reviewed the code and left detailed comments", "label": 2, "label_name": "STANDUP"}
+{"text": "Blocked on getting repo access from the admin team", "label": 2, "label_name": "STANDUP"}
+{"text": "I fixed three bugs yesterday and updated the tickets", "label": 2, "label_name": "STANDUP"}
+{"text": "I am doing a code review for the payment module today", "label": 2, "label_name": "STANDUP"}
+{"text": "The story is done end-to-end and deployed to staging", "label": 2, "label_name": "STANDUP"}
+{"text": "Yesterday I attended the architecture review session", "label": 2, "label_name": "STANDUP"}
+{"text": "Today I plan to write integration tests for the new API", "label": 2, "label_name": "STANDUP"}
+{"text": "I am blocked waiting for the UX team to finalize designs", "label": 2, "label_name": "STANDUP"}
+{"text": "I spent yesterday refactoring the legacy authentication code", "label": 2, "label_name": "STANDUP"}
+{"text": "All my tasks are on track no impediments to report", "label": 2, "label_name": "STANDUP"}
+{"text": "I submitted the PR and it is pending approval", "label": 2, "label_name": "STANDUP"}
+{"text": "I need the QA environment to be updated before I can test", "label": 2, "label_name": "STANDUP"}
+{"text": "I completed the backend endpoints for the reporting feature", "label": 2, "label_name": "STANDUP"}
+{"text": "Today I will fix the critical regression found in testing", "label": 2, "label_name": "STANDUP"}
+{"text": "I am picking up the last story in the sprint backlog today", "label": 2, "label_name": "STANDUP"}
+{"text": "The deployment failed due to a config issue I am fixing it", "label": 2, "label_name": "STANDUP"}
+{"text": "I paired with Tom yesterday to resolve the CORS issue", "label": 2, "label_name": "STANDUP"}
+{"text": "I will start on the new story once the review is approved", "label": 2, "label_name": "STANDUP"}
+{"text": "I have been working on improving the test coverage", "label": 2, "label_name": "STANDUP"}
+{"text": "My update is that the feature is in final QA testing", "label": 2, "label_name": "STANDUP"}
+{"text": "I finished the sprint task and moved it to done", "label": 2, "label_name": "STANDUP"}
+{"text": "Blocked because the API keys expired in the DEV environment", "label": 2, "label_name": "STANDUP"}
+{"text": "I completed the design review and approved the mockups", "label": 2, "label_name": "STANDUP"}
+{"text": "Today I will close out the remaining sprint deliverables", "label": 2, "label_name": "STANDUP"}
+{"text": "We are reviewing the backlog to finalize what goes into this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The team agreed to take on twenty-two story points this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We need to sequence the stories so dependencies are handled first", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint will run from Monday to the following Friday", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are selecting the top stories that align with the sprint goal", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Each developer should pull their own stories from the backlog", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The team capacity is sixty hours after accounting for leave", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We will run a two-week iteration starting tomorrow morning", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We committed to the mobile notification story for this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Story point estimates need to be agreed before we close planning", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We cannot take on more than six stories given our capacity", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The security hardening story is our highest priority this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Let us break the large API story into two smaller deliverables", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint begins today with a clear goal of shipping checkout", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are including a technical investigation spike in this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Our velocity from last sprint was thirty-five points completed", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Alice is the sprint champion and will track the burndown chart", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We need to account for the code freeze deadline in sprint scope", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The team is reducing commitment to twenty points this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We will not include ungroomed stories in the sprint backlog", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The DevOps automation story depends on the infra work being done", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Sprint review and retrospective are booked for the last day", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are adding the bug fixes to the sprint alongside new features", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Team agreed the definition of done requires all tests to pass", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint will have a focus on reliability and performance", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We are pulling three high-priority stories from the product backlog", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The sprint planning is complete and scope is locked for this iteration", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "Mike will lead the API integration delivery for this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "We discussed risks and the main one is the third-party API dependency", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The team is committed to delivering the SSO feature this sprint", "label": 1, "label_name": "SPRINT_PLANNING"}
+{"text": "The quarterly product goals are aligned with the business strategy", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need executive approval to proceed with the new platform investment", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The product committee reviewed the initiative and gave the green light", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Our revenue model depends on the premium feature being delivered in Q3", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The user journey mapping session revealed key friction points", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We are prioritising epics that reduce customer churn first", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The WSJF analysis confirms the SSO epic should be top of the backlog", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to define the North Star metric before grooming the backlog", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The investor demo is in two weeks and we need the core features ready", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We are increasing the product team headcount to deliver on roadmap", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The business case was approved and the project is now fully funded", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to decide which features to cut to hit the release deadline", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The product led growth strategy requires self-serve onboarding", "label": 0, "label_name": "PM_MEETING"}
+{"text": "Our biggest competitive risk is not shipping the reporting feature", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We are conducting customer discovery interviews this week for validation", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The platform migration epic is critical for scalability in Q4", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to align with marketing on the feature announcement timeline", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The product review showed strong PMF for the analytics features", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The feature requires a data privacy review before going to production", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We reviewed CAC and LTV ratios to prioritise monetisation epics", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The leadership team approved the new product vision document", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need a beta programme before the full public launch of this feature", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The design sprint output will guide the next quarter roadmap decisions", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We are reprioritising the roadmap based on the latest user feedback", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The product OKRs for this quarter include a ten percent retention lift", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need to negotiate the contract terms before committing to the epic", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The market analysis shows strong demand for AI-powered features", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We need sign-off from security before adding the new data integrations", "label": 0, "label_name": "PM_MEETING"}
+{"text": "The executive sponsor confirmed the strategic priority of this initiative", "label": 0, "label_name": "PM_MEETING"}
+{"text": "We approved the product hypothesis and will run an experiment next week", "label": 0, "label_name": "PM_MEETING"}

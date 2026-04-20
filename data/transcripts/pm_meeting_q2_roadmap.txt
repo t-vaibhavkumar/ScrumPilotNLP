@@ -1,0 +1,53 @@
+MEETING TYPE: PM / Product Meeting (Backlog Grooming + Roadmap)
+DATE: 2026-04-10
+PARTICIPANTS: David (Product Owner), Priya (CPO), Alex (Head of Engineering), Sarah (Scrum Master)
+
+---
+
+PRIYA: Good morning everyone. Today we have three goals — review Q2 roadmap priorities, score new epics using WSJF, and align on the definition of done for each initiative. David, please walk us through the epics.
+
+DAVID: Thanks Priya. We have six new epic candidates for Q2. I have pre-scored them on business value, time criticality, and risk reduction. Let me go through the top four.
+
+The first epic is the Enterprise SSO Integration. Business value is nine out of ten — our enterprise customers have explicitly requested it, and we are losing deals to competitors who already have it. Time criticality is ten because we have a committed deal closing next month that depends on this. Risk reduction is six because it removes the password management risk. Job size is seven. WSJF score comes to approximately 3.6.
+
+ALEX: We have validated this with the engineering team. Seven sprints is realistic. The main dependency is the SAML library evaluation which we are completing this week.
+
+PRIYA: Approved. Enterprise SSO goes to the top of the roadmap. David, next epic?
+
+DAVID: The second epic is the Analytics Dashboard. Business value is eight — NPS data shows that the number one complaint from power users is lack of reporting. Time criticality is seven because Q3 renewal season is August. Risk reduction is five. Job size is five. WSJF is four.
+
+PRIYA: This one is also urgent. Revenue impact is significant. Alex, can we start the discovery sprint for analytics immediately?
+
+ALEX: Yes. I will assign Tom to lead the discovery. We should have a technical design document by end of this sprint.
+
+PRIYA: Good. The analytics epic is approved for Q2 with discovery starting next sprint.
+
+DAVID: Third epic is GDPR Data Export — business value six, time criticality eight because of regulatory deadline in June, risk reduction nine because non-compliance means fines, job size four. WSJF is approximately 5.75 — highest score in the batch.
+
+PRIYA: The regulatory deadline makes this non-negotiable. We need to start this immediately. I will flag it to the compliance team for sign-off. Alex, can we put one developer on this from next sprint?
+
+ALEX: Yes. Bob has GDPR experience. I will assign him as the lead on the compliance epic.
+
+DAVID: The fourth is the Mobile App — native iOS and Android. Business value ten, time criticality five, risk reduction three, job size ten. WSJF is 1.8. This is the lowest-priority epic given the effort involved.
+
+PRIYA: Agreed. The mobile app goes to Q4 at earliest. We will not commit to this in Q2. Let us keep it in the backlog for planning purposes.
+
+DAVID: That covers the main epics. I also want to flag that the technical debt epic should be included in the roadmap — specifically the legacy API deprecation. Alex, what is the engineering view?
+
+ALEX: The legacy API is costing us two engineering days per sprint in maintenance. If we do not deprecate it in Q2, it gets worse. I recommend we allocate twenty percent of each sprint to technical debt alongside feature work.
+
+PRIYA: Agreed. Let us formalise the technical debt epic. David, can you write up the stories for the legacy API sunset?
+
+DAVID: Will do. I will have the epic and initial stories in Jira by end of this week.
+
+PRIYA: Summary of decisions — Enterprise SSO is top priority, Analytics Dashboard is approved for Q2, GDPR Data Export starts immediately and Bob is the lead, Mobile App deferred to Q4, technical debt epic formalised with twenty percent sprint allocation. Sarah, can you update the roadmap in Jira after this meeting?
+
+SARAH: Yes, I will update the product roadmap and create the epic tickets this afternoon.
+
+PRIYA: Any other items before we close?
+
+ALEX: One thing — we need to create a ticket for the API contract documentation that the team needs before Sprint 14. That is blocking Bob from continuing.
+
+DAVID: I will open that ticket today.
+
+PRIYA: Good. Thanks everyone. See you at the sprint planning on Monday.

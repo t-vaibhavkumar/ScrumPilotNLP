@@ -1,0 +1,190 @@
+{"text": "I finished the Stripe payment gateway integration", "label": 1, "label_name": "complete_task"}
+{"text": "I completed the database migration script", "label": 1, "label_name": "complete_task"}
+{"text": "The login screen implementation is done", "label": 1, "label_name": "complete_task"}
+{"text": "I wrapped up the API endpoints and pushed the PR", "label": 1, "label_name": "complete_task"}
+{"text": "I deployed the hotfix to staging last night", "label": 1, "label_name": "complete_task"}
+{"text": "I merged the feature branch after code review", "label": 1, "label_name": "complete_task"}
+{"text": "Done with the database schema changes", "label": 1, "label_name": "complete_task"}
+{"text": "I finished the email template", "label": 1, "label_name": "complete_task"}
+{"text": "I completed the TypeScript migration for the auth module", "label": 1, "label_name": "complete_task"}
+{"text": "I closed two bugs from the QA backlog yesterday", "label": 1, "label_name": "complete_task"}
+{"text": "The feature is ready for QA sign-off", "label": 1, "label_name": "complete_task"}
+{"text": "I deployed the new build to production", "label": 1, "label_name": "complete_task"}
+{"text": "I shipped the dark mode feature to production", "label": 1, "label_name": "complete_task"}
+{"text": "I resolved the performance issue in the search endpoint", "label": 1, "label_name": "complete_task"}
+{"text": "I finished the OAuth integration with Google", "label": 1, "label_name": "complete_task"}
+{"text": "I completed the load testing scripts", "label": 1, "label_name": "complete_task"}
+{"text": "The acceptance criteria review is done with the PO", "label": 1, "label_name": "complete_task"}
+{"text": "I resolved the race condition in the worker service", "label": 1, "label_name": "complete_task"}
+{"text": "The sprint retrospective prep is complete", "label": 1, "label_name": "complete_task"}
+{"text": "I finished the Kubernetes deployment scripts", "label": 1, "label_name": "complete_task"}
+{"text": "Done with the code review of three pull requests", "label": 1, "label_name": "complete_task"}
+{"text": "The API contract document is complete", "label": 1, "label_name": "complete_task"}
+{"text": "I finalised the sprint backlog grooming", "label": 1, "label_name": "complete_task"}
+{"text": "I completed the GraphQL schema design", "label": 1, "label_name": "complete_task"}
+{"text": "The notification service integration is done", "label": 1, "label_name": "complete_task"}
+{"text": "I finished implementing the webhook endpoints", "label": 1, "label_name": "complete_task"}
+{"text": "I completed the user profile settings page", "label": 1, "label_name": "complete_task"}
+{"text": "The caching layer implementation is done", "label": 1, "label_name": "complete_task"}
+{"text": "Done with the i18n translations for the app", "label": 1, "label_name": "complete_task"}
+{"text": "I completed the GDPR data export feature", "label": 1, "label_name": "complete_task"}
+{"text": "The analytics dashboard is fully implemented", "label": 1, "label_name": "complete_task"}
+{"text": "I finished the role-based access control module", "label": 1, "label_name": "complete_task"}
+{"text": "Done with the onboarding wizard UI", "label": 1, "label_name": "complete_task"}
+{"text": "I finished the unit tests for the checkout service", "label": 1, "label_name": "complete_task"}
+{"text": "The password reset flow is fully implemented", "label": 1, "label_name": "complete_task"}
+{"text": "I wrapped up the social login feature yesterday", "label": 1, "label_name": "complete_task"}
+{"text": "Done with the sprint demo preparation slides", "label": 1, "label_name": "complete_task"}
+{"text": "I completed the Jira integration for the pipeline", "label": 1, "label_name": "complete_task"}
+{"text": "The user import CSV feature is complete", "label": 1, "label_name": "complete_task"}
+{"text": "I finished the infrastructure monitoring scripts", "label": 1, "label_name": "complete_task"}
+{"text": "We need to create a ticket for the failing tests", "label": 0, "label_name": "create_task"}
+{"text": "Someone should open a task for the login bug", "label": 0, "label_name": "create_task"}
+{"text": "We need a new story for the performance testing work", "label": 0, "label_name": "create_task"}
+{"text": "Can someone create a ticket for the memory leak", "label": 0, "label_name": "create_task"}
+{"text": "We need to add a task for updating the API documentation", "label": 0, "label_name": "create_task"}
+{"text": "Let us open a new story for the mobile push notifications", "label": 0, "label_name": "create_task"}
+{"text": "We need a bug ticket for the checkout session expiry issue", "label": 0, "label_name": "create_task"}
+{"text": "Please raise a ticket for the missing error handling", "label": 0, "label_name": "create_task"}
+{"text": "We should create a story for the search autocomplete feature", "label": 0, "label_name": "create_task"}
+{"text": "I will log a bug for the dashboard loading slowly", "label": 0, "label_name": "create_task"}
+{"text": "Let us create a new epic for the data export functionality", "label": 0, "label_name": "create_task"}
+{"text": "We need a ticket for the SSL certificate renewal", "label": 0, "label_name": "create_task"}
+{"text": "Someone needs to open a task for the GDPR compliance work", "label": 0, "label_name": "create_task"}
+{"text": "Let us add a story for the bulk user import feature", "label": 0, "label_name": "create_task"}
+{"text": "We need to create a spike story for the ML evaluation", "label": 0, "label_name": "create_task"}
+{"text": "Please open a ticket for the broken email notifications", "label": 0, "label_name": "create_task"}
+{"text": "We should raise a bug for the pagination not working", "label": 0, "label_name": "create_task"}
+{"text": "Let us log the accessibility issues as separate tickets", "label": 0, "label_name": "create_task"}
+{"text": "We need a new task for updating the deployment scripts", "label": 0, "label_name": "create_task"}
+{"text": "I am going to create a story for the dark mode feature", "label": 0, "label_name": "create_task"}
+{"text": "We need a ticket for refactoring the authentication module", "label": 0, "label_name": "create_task"}
+{"text": "Please log a bug for the missing validation on the form", "label": 0, "label_name": "create_task"}
+{"text": "Let us create a task for reviewing the third-party contracts", "label": 0, "label_name": "create_task"}
+{"text": "We should add a story for the admin reporting dashboard", "label": 0, "label_name": "create_task"}
+{"text": "I will create an epic for the enterprise SSO feature", "label": 0, "label_name": "create_task"}
+{"text": "We need a ticket for the failing integration tests in CI", "label": 0, "label_name": "create_task"}
+{"text": "Let us raise a bug for the incorrect price rounding", "label": 0, "label_name": "create_task"}
+{"text": "We need to add a task for the monthly security scan", "label": 0, "label_name": "create_task"}
+{"text": "Please create a story for the custom branding options", "label": 0, "label_name": "create_task"}
+{"text": "Let us open a task for the database index optimisation", "label": 0, "label_name": "create_task"}
+{"text": "We need a ticket for migrating from v1 to v2 of the API", "label": 0, "label_name": "create_task"}
+{"text": "I will log the UX feedback as improvement tickets", "label": 0, "label_name": "create_task"}
+{"text": "Let us create a story for the audit trail feature", "label": 0, "label_name": "create_task"}
+{"text": "We need to raise a ticket for the token expiry bug", "label": 0, "label_name": "create_task"}
+{"text": "Please create a task for reviewing the open-source licences", "label": 0, "label_name": "create_task"}
+{"text": "We should log the performance regression as a bug", "label": 0, "label_name": "create_task"}
+{"text": "Let us add a story for the multi-tenant support", "label": 0, "label_name": "create_task"}
+{"text": "We need a ticket for the data pipeline reliability issue", "label": 0, "label_name": "create_task"}
+{"text": "I will create a task for setting up the staging environment", "label": 0, "label_name": "create_task"}
+{"text": "Let us raise a story for the in-app tutorial feature", "label": 0, "label_name": "create_task"}
+{"text": "Still working on the CI pipeline setup", "label": 2, "label_name": "update_status"}
+{"text": "Blocked waiting for AWS credentials from DevOps", "label": 2, "label_name": "update_status"}
+{"text": "I am still in progress on the search feature", "label": 2, "label_name": "update_status"}
+{"text": "The integration tests are still failing on CI", "label": 2, "label_name": "update_status"}
+{"text": "I need one more day for the analytics dashboard", "label": 2, "label_name": "update_status"}
+{"text": "The payment story is in review pending QA sign-off", "label": 2, "label_name": "update_status"}
+{"text": "I am halfway through the authentication implementation", "label": 2, "label_name": "update_status"}
+{"text": "The deployment is on hold pending security review", "label": 2, "label_name": "update_status"}
+{"text": "The story is blocked by the missing API contract", "label": 2, "label_name": "update_status"}
+{"text": "I am in progress on the database optimisation task", "label": 2, "label_name": "update_status"}
+{"text": "The feature is in QA testing now", "label": 2, "label_name": "update_status"}
+{"text": "Still investigating the root cause of the memory leak", "label": 2, "label_name": "update_status"}
+{"text": "The PR is under review we are waiting for approvals", "label": 2, "label_name": "update_status"}
+{"text": "The task is in progress and will be done by Thursday", "label": 2, "label_name": "update_status"}
+{"text": "I moved the login story to in progress this morning", "label": 2, "label_name": "update_status"}
+{"text": "The deployment to staging is waiting for the config update", "label": 2, "label_name": "update_status"}
+{"text": "I started the refactoring work it will take two more days", "label": 2, "label_name": "update_status"}
+{"text": "The story is in code review and almost ready", "label": 2, "label_name": "update_status"}
+{"text": "We are blocked on the third-party API availability", "label": 2, "label_name": "update_status"}
+{"text": "The task moved to in progress after the planning session", "label": 2, "label_name": "update_status"}
+{"text": "I am continuing the mobile layout work today", "label": 2, "label_name": "update_status"}
+{"text": "The feature is under regression testing right now", "label": 2, "label_name": "update_status"}
+{"text": "Still blocked on the expired certificate issue", "label": 2, "label_name": "update_status"}
+{"text": "The ticket is in review and expected to close today", "label": 2, "label_name": "update_status"}
+{"text": "I moved the notification story to done last night", "label": 2, "label_name": "update_status"}
+{"text": "The task has been escalated due to the critical bug found", "label": 2, "label_name": "update_status"}
+{"text": "I am wrapping up the implementation it is ninety percent done", "label": 2, "label_name": "update_status"}
+{"text": "The story is waiting for product clarification on edge cases", "label": 2, "label_name": "update_status"}
+{"text": "I updated the ticket status to blocked in Jira", "label": 2, "label_name": "update_status"}
+{"text": "The build is failing again I am on it", "label": 2, "label_name": "update_status"}
+{"text": "I will update the ticket to done once QA signs off", "label": 2, "label_name": "update_status"}
+{"text": "The story moved to review after the merge yesterday", "label": 2, "label_name": "update_status"}
+{"text": "We need to mark the old ticket as closed", "label": 2, "label_name": "update_status"}
+{"text": "The task is stalled pending the design handoff", "label": 2, "label_name": "update_status"}
+{"text": "The API gateway task is in progress", "label": 2, "label_name": "update_status"}
+{"text": "The task status needs to be updated to in review", "label": 2, "label_name": "update_status"}
+{"text": "I paused work on the feature due to a critical bug", "label": 2, "label_name": "update_status"}
+{"text": "The caching task is done and deployed to staging", "label": 2, "label_name": "update_status"}
+{"text": "I resumed work on the search indexing after the outage", "label": 2, "label_name": "update_status"}
+{"text": "The story is about eighty percent complete", "label": 2, "label_name": "update_status"}
+{"text": "Tom will take the authentication story", "label": 3, "label_name": "assign_task"}
+{"text": "Mike is assigned to the payment feature", "label": 3, "label_name": "assign_task"}
+{"text": "Can someone pick up the analytics dashboard ticket", "label": 3, "label_name": "assign_task"}
+{"text": "Alice will handle the notification service integration", "label": 3, "label_name": "assign_task"}
+{"text": "Bob is taking the CI/CD pipeline story this sprint", "label": 3, "label_name": "assign_task"}
+{"text": "I am assigning the search feature to David", "label": 3, "label_name": "assign_task"}
+{"text": "The bug has been assigned to the QA team", "label": 3, "label_name": "assign_task"}
+{"text": "Emma will be responsible for the GDPR compliance story", "label": 3, "label_name": "assign_task"}
+{"text": "Let us assign the authentication ticket to Mike", "label": 3, "label_name": "assign_task"}
+{"text": "Who is going to pick up the mobile layout story", "label": 3, "label_name": "assign_task"}
+{"text": "The DevOps task has been assigned to the infrastructure team", "label": 3, "label_name": "assign_task"}
+{"text": "I will assign the performance testing ticket to Bob", "label": 3, "label_name": "assign_task"}
+{"text": "Sarah takes the onboarding wizard story", "label": 3, "label_name": "assign_task"}
+{"text": "The database migration task is assigned to Tom", "label": 3, "label_name": "assign_task"}
+{"text": "Let us give the API documentation task to Alice", "label": 3, "label_name": "assign_task"}
+{"text": "The security review task is assigned to the security team", "label": 3, "label_name": "assign_task"}
+{"text": "David will take over the feature flagging story", "label": 3, "label_name": "assign_task"}
+{"text": "Mike and Alice are pairing on the checkout flow", "label": 3, "label_name": "assign_task"}
+{"text": "The new ticket is assigned to the junior developer", "label": 3, "label_name": "assign_task"}
+{"text": "I am taking ownership of the monitoring setup task", "label": 3, "label_name": "assign_task"}
+{"text": "Let us reassign the blocked ticket to someone available", "label": 3, "label_name": "assign_task"}
+{"text": "The epic is assigned to the platform team", "label": 3, "label_name": "assign_task"}
+{"text": "Sarah will pair with Bob on the auth module", "label": 3, "label_name": "assign_task"}
+{"text": "The escalated bug is now assigned to the senior engineer", "label": 3, "label_name": "assign_task"}
+{"text": "I will pick up the unassigned story from the backlog", "label": 3, "label_name": "assign_task"}
+{"text": "Let us move the unowned ticket to Alice's queue", "label": 3, "label_name": "assign_task"}
+{"text": "Tom is covering for Mike on the payment story", "label": 3, "label_name": "assign_task"}
+{"text": "The infra task is going to the DevOps team lead", "label": 3, "label_name": "assign_task"}
+{"text": "I am taking the spike story for the ML evaluation", "label": 3, "label_name": "assign_task"}
+{"text": "Bob volunteered to take on the code review task", "label": 3, "label_name": "assign_task"}
+{"text": "Emma is the owner of the product analytics dashboard", "label": 3, "label_name": "assign_task"}
+{"text": "The testing stories are assigned to the QA engineers", "label": 3, "label_name": "assign_task"}
+{"text": "I assigned myself the accessibility improvement ticket", "label": 3, "label_name": "assign_task"}
+{"text": "Let us assign the hotfix to the on-call engineer", "label": 3, "label_name": "assign_task"}
+{"text": "The monitoring setup will be handled by David", "label": 3, "label_name": "assign_task"}
+{"text": "Alice is the lead on the redesign project", "label": 3, "label_name": "assign_task"}
+{"text": "The compliance audit is assigned to the legal and tech team", "label": 3, "label_name": "assign_task"}
+{"text": "Tom will be the reviewer for the payment PR", "label": 3, "label_name": "assign_task"}
+{"text": "Let us find an owner for the unassigned data pipeline task", "label": 3, "label_name": "assign_task"}
+{"text": "The sprint backlog items need owners before we start", "label": 3, "label_name": "assign_task"}
+{"text": "Good morning everyone", "label": 4, "label_name": "no_action"}
+{"text": "The sprint ends on Friday", "label": 4, "label_name": "no_action"}
+{"text": "Let us start the standup", "label": 4, "label_name": "no_action"}
+{"text": "Good morning team how is everyone doing", "label": 4, "label_name": "no_action"}
+{"text": "The meeting is scheduled for two PM", "label": 4, "label_name": "no_action"}
+{"text": "Let us keep this short today", "label": 4, "label_name": "no_action"}
+{"text": "Happy Friday everyone", "label": 4, "label_name": "no_action"}
+{"text": "The sprint demo went really well yesterday", "label": 4, "label_name": "no_action"}
+{"text": "We had a great team lunch today", "label": 4, "label_name": "no_action"}
+{"text": "The office is closed on Monday for the holiday", "label": 4, "label_name": "no_action"}
+{"text": "Let us check in about the sprint goals", "label": 4, "label_name": "no_action"}
+{"text": "The quarterly business review is next week", "label": 4, "label_name": "no_action"}
+{"text": "The internet was down this morning", "label": 4, "label_name": "no_action"}
+{"text": "Does anyone want to grab coffee after standup", "label": 4, "label_name": "no_action"}
+{"text": "The team did great work this sprint", "label": 4, "label_name": "no_action"}
+{"text": "Let us keep the standup to fifteen minutes", "label": 4, "label_name": "no_action"}
+{"text": "Are we still meeting at two PM today", "label": 4, "label_name": "no_action"}
+{"text": "The product demo is tomorrow morning", "label": 4, "label_name": "no_action"}
+{"text": "Let us give a round of applause for the team", "label": 4, "label_name": "no_action"}
+{"text": "Quick reminder the retrospective is on Thursday", "label": 4, "label_name": "no_action"}
+{"text": "Great job everyone on hitting the sprint goal", "label": 4, "label_name": "no_action"}
+{"text": "The sprint velocity is improving nicely", "label": 4, "label_name": "no_action"}
+{"text": "Let us check on dependencies before we wrap up", "label": 4, "label_name": "no_action"}
+{"text": "Thank you all for the update", "label": 4, "label_name": "no_action"}
+{"text": "The new team member starts next Monday", "label": 4, "label_name": "no_action"}
+{"text": "Let us make sure everyone is aligned on the goal", "label": 4, "label_name": "no_action"}
+{"text": "The build pipeline is green today", "label": 4, "label_name": "no_action"}
+{"text": "Good job team on the release yesterday", "label": 4, "label_name": "no_action"}
+{"text": "No agenda items from me for now", "label": 4, "label_name": "no_action"}
+{"text": "The retrospective action items are tracked in Jira", "label": 4, "label_name": "no_action"}
